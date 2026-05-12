@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Octoverse – Das soziale Netzwerk für VilloChat-Nutzer">
+    <meta property="og:title" content="Octoverse">
+    <meta property="og:description" content="Posts, Likes, Kommentare – verknüpft mit VilloChat">
+    <meta property="og:url" content="https://octoverse-social.vercel.app">
+    <link rel="canonical" href="https://octoverse-social.vercel.app">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Octoverse</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d9bf0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2a6 6 0 0 1 6 6c0 .6-.1 1.2-.2 1.8C19.3 10.6 21 12.2 21 14c0 2-1.8 3.5-4 3.5-.3 0-.6 0-.9-.1l-.3 1.9c-.2 1.4-1.4 2.4-2.8 2.7V22h-2v-.1C9.6 21.6 8.4 20.6 8.2 19.3l-.3-1.9c-.3.1-.6.1-.9.1C4.8 17.5 3 16 3 14c0-1.8 1.7-3.4 3.2-4.2C6.1 9.2 6 8.6 6 8a6 6 0 0 1 6-6z'/%3E%3C/svg%3E">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #000000;
+            --bg-secondary: #0f0f0f;
+            --bg-hover: #1a1a1a;
+            --bg-card: #111111;
+            --border: #2f2f2f;
+            --text: #e7e9ea;
+            --text-muted: #71767b;
+            --accent: #1d9bf0;
+            --accent-hover: #1a8cd8;
+            --accent-like: #f91880;
+            --accent-like-bg: rgba(249,24,128,0.1);
+            --accent-retweet: #00ba7c;
+            --sidebar-width: 275px;
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        body.light {
+            --bg: #ffffff;
+            --bg-secondary: #f7f9f9;
+            --bg-hover: #f7f9f9;
+            --bg-card: #ffffff;
+            --border: #eff3f4;
+            --text: #0f1419;
+            --text-muted: #536471;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            min-height: 100vh;
+            font-size: 15px;
+        }
+
+        /* ─── LAYOUT ─── */
+        #app { display: flex; min-height: 100vh; max-width: 1280px; margin: 0 auto; }
+        #sidebar { width: var(--sidebar-width); flex-shrink: 0; border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 0 12px; }
+        #main { flex: 1; border-right: 1px solid var(--border); min-height: 100vh; }
+        #widgets { width: 350px; flex-shrink: 0; padding: 0 24px; }
+
+        /* ─── LOGIN SCREEN ─── */
+        #login-screen {
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; background: var(--bg);
+        }
+        .login-box {
+            width: 100%; max-width: 400px; padding: 48px 40px;
+            border: 1px solid var(--border); border-radius: 16px;
+            background: var(--bg-card);
+        }
+        .login-logo { font-size: 48px; text-align: center; margin-bottom: 24px; }
+        .login-title { font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+        .login-sub { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 32px; }
+        .login-input {
+            width: 100%; padding: 14px 16px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--bg-secondary); color: var(--text);
+            font-size: 15px; font-family: var(--font); outline: none; margin-bottom: 12px;
+            transition: border-color .2s;
+        }
+        .login-input:focus { border-color: var(--accent); }
+        .login-btn {
+            width: 100%; padding: 14px; border: none; border-radius: 9999px;
+            background: var(--text); color: var(--bg); font-size: 15px;
+            font-weight: 700; cursor: pointer; font-family: var(--font); margin-top: 8px;
+            transition: opacity .2s;
+        }
+        .login-btn:hover { opacity: .85; }
+        .login-btn.outline {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text); margin-top: 0;
+        }
+        .login-divider { text-align: center; color: var(--text-muted); margin: 16px 0; font-size: 14px; }
+        .login-note { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 16px; }
+
+        /* ─── SIDEBAR ─── */
+        .sidebar-logo { font-size: 30px; padding: 12px 12px 4px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 20px; padding: 12px;
+            border-radius: 9999px; cursor: pointer; font-size: 20px; font-weight: 400;
+            transition: background .15s; color: var(--text); text-decoration: none;
+            white-space: nowrap; margin: 2px 0;
+        }
+        .nav-item:hover { background: var(--bg-hover); }
+        .nav-item.active { font-weight: 700; }
+        .nav-icon { font-size: 26px; width: 26px; flex-shrink: 0; }
+        .nav-label { font-size: 20px; }
+        .nav-post-btn {
+            margin: 16px 12px; padding: 16px; background: var(--accent);
+            color: white; border: none; border-radius: 9999px; font-size: 17px;
+            font-weight: 700; cursor: pointer; font-family: var(--font);
+            transition: background .2s; display: flex; align-items: center;
+            justify-content: center; gap: 8px;
+        }
+        .nav-post-btn:hover { background: var(--accent-hover); }
+        .sidebar-user {
+            margin-top: auto; padding: 12px; border-radius: 9999px;
+            cursor: pointer; display: flex; align-items: center; gap: 12px;
+            transition: background .15s; margin-bottom: 8px;
+        }
+        .sidebar-user:hover { background: var(--bg-hover); }
+        .sidebar-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--accent); display: flex; align-items: center;
+            justify-content: center; font-weight: 700; font-size: 16px;
+            color: white; flex-shrink: 0; overflow: hidden;
+        }
+        .sidebar-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .sidebar-user-info { flex: 1; min-width: 0; }
+        .sidebar-user-name { font-weight: 700; font-size: 15px; }
+        .sidebar-user-handle { color: var(--text-muted); font-size: 14px; }
+
+        /* ─── HEADER ─── */
+        .feed-header {
+            position: sticky; top: 0; z-index: 10;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border); padding: 0 16px;
+        }
+        body.light .feed-header { background: rgba(255,255,255,0.85); }
+        .feed-header-inner {
+            display: flex; align-items: center; height: 53px; gap: 8px;
+        }
+        .feed-title { font-size: 20px; font-weight: 700; flex: 1; }
+        .tab-bar { display: flex; border-bottom: 1px solid var(--border); }
+        .tab { flex: 1; padding: 16px; text-align: center; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--text-muted); position: relative; transition: color .2s; }
+        .tab:hover { background: var(--bg-hover); color: var(--text); }
+        .tab.active { color: var(--text); font-weight: 700; }
+        .tab.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 56px; height: 4px; background: var(--accent); border-radius: 2px; }
+
+        /* ─── COMPOSE BOX ─── */
+        .compose-box {
+            display: flex; gap: 12px; padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .compose-area { flex: 1; }
+        .compose-textarea {
+            width: 100%; background: transparent; border: none; outline: none;
+            color: var(--text); font-size: 20px; font-family: var(--font);
+            resize: none; min-height: 52px; max-height: 300px;
+            line-height: 1.4; placeholder-color: var(--text-muted);
+        }
+        .compose-textarea::placeholder { color: var(--text-muted); }
+        .compose-toolbar {
+            display: flex; align-items: center; padding-top: 12px;
+            border-top: 1px solid var(--border); margin-top: 8px;
+        }
+        .compose-actions { display: flex; gap: 4px; flex: 1; }
+        .compose-action {
+            background: none; border: none; cursor: pointer;
+            color: var(--accent); font-size: 20px; padding: 8px; border-radius: 50%;
+            transition: background .15s; display: flex; align-items: center;
+        }
+        .compose-action:hover { background: rgba(29,155,240,.1); }
+        .compose-submit {
+            background: var(--accent); color: white; border: none;
+            border-radius: 9999px; padding: 8px 18px; font-size: 15px;
+            font-weight: 700; cursor: pointer; font-family: var(--font);
+            transition: background .2s;
+        }
+        .compose-submit:hover { background: var(--accent-hover); }
+        .compose-submit:disabled { opacity: .5; cursor: default; }
+        .compose-char { font-size: 13px; color: var(--text-muted); margin-right: 8px; align-self: center; }
+        .compose-char.warn { color: #ffd400; }
+        .compose-char.over { color: #f4212e; }
+        .compose-image-preview {
+            margin-top: 8px; position: relative; display: inline-block;
+        }
+        .compose-image-preview img {
+            max-width: 100%; max-height: 300px; border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+        .compose-image-remove {
+            position: absolute; top: 8px; right: 8px; background: rgba(15,20,25,.75);
+            border: none; color: white; border-radius: 50%; width: 32px; height: 32px;
+            font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ─── POST / TWEET ─── */
+        .post {
+            display: flex; gap: 12px; padding: 12px 16px;
+            border-bottom: 1px solid var(--border); cursor: pointer;
+            transition: background .15s;
+        }
+        .post:hover { background: var(--bg-hover); }
+        .post-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--accent); display: flex; align-items: center;
+            justify-content: center; font-weight: 700; font-size: 16px;
+            color: white; flex-shrink: 0; overflow: hidden;
+        }
+        .post-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .post-body { flex: 1; min-width: 0; }
+        .post-header { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+        .post-name { font-weight: 700; font-size: 15px; }
+        .post-handle { color: var(--text-muted); font-size: 15px; }
+        .post-dot { color: var(--text-muted); }
+        .post-time { color: var(--text-muted); font-size: 15px; }
+        .post-text { margin-top: 4px; line-height: 1.5; font-size: 15px; white-space: pre-wrap; word-break: break-word; }
+        .post-image {
+            margin-top: 12px; border-radius: 16px; overflow: hidden;
+            border: 1px solid var(--border); max-height: 500px;
+        }
+        .post-image img { width: 100%; max-height: 500px; object-fit: cover; display: block; }
+
+        /* ─── POST ACTIONS ─── */
+        .post-actions { display: flex; gap: 0; margin-top: 12px; }
+        .post-action {
+            display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+            border-radius: 9999px; cursor: pointer; font-size: 13px;
+            color: var(--text-muted); background: none; border: none;
+            font-family: var(--font); transition: color .15s, background .15s;
+            flex: 1; max-width: 100px;
+        }
+        .post-action:hover.like { color: var(--accent-like); background: var(--accent-like-bg); }
+        .post-action:hover.comment { color: var(--accent); background: rgba(29,155,240,.1); }
+        .post-action:hover.share { color: var(--accent-retweet); background: rgba(0,186,124,.1); }
+        .post-action.liked { color: var(--accent-like); }
+        .post-action.liked svg { fill: var(--accent-like); }
+        .post-action-icon { font-size: 18px; }
+        .post-count { font-size: 13px; }
+
+        /* ─── COMMENTS ─── */
+        .comment-section {
+            padding: 0 16px 8px; border-bottom: 1px solid var(--border);
+        }
+        .comment {
+            display: flex; gap: 10px; padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .comment:last-child { border-bottom: none; }
+        .comment-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--accent); display: flex; align-items: center;
+            justify-content: center; font-size: 13px; font-weight: 700;
+            color: white; flex-shrink: 0; overflow: hidden;
+        }
+        .comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .comment-body { flex: 1; }
+        .comment-header { font-size: 13px; color: var(--text-muted); margin-bottom: 2px; }
+        .comment-header strong { color: var(--text); font-size: 14px; }
+        .comment-text { font-size: 14px; line-height: 1.4; }
+        .comment-input-row {
+            display: flex; gap: 10px; align-items: flex-start; padding: 10px 0;
+        }
+        .comment-input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: var(--text); font-size: 15px; font-family: var(--font);
+            resize: none; line-height: 1.4; border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+        .comment-input::placeholder { color: var(--text-muted); }
+        .comment-send {
+            background: var(--accent); color: white; border: none;
+            border-radius: 9999px; padding: 6px 16px; font-size: 14px;
+            font-weight: 700; cursor: pointer; font-family: var(--font);
+        }
+        .comment-send:disabled { opacity: .5; cursor: default; }
+
+        /* ─── WIDGETS PANEL ─── */
+        .widget-search {
+            position: sticky; top: 0; padding: 12px 0 8px;
+            background: var(--bg); z-index: 5;
+        }
+        .search-bar {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--bg-secondary); border: 1px solid transparent;
+            border-radius: 9999px; padding: 10px 16px;
+            transition: border-color .2s;
+        }
+        .search-bar:focus-within { border-color: var(--accent); background: var(--bg); }
+        .search-bar input {
+            flex: 1; background: none; border: none; outline: none;
+            color: var(--text); font-size: 15px; font-family: var(--font);
+        }
+        .search-bar input::placeholder { color: var(--text-muted); }
+        .widget-card {
+            background: var(--bg-secondary); border-radius: 16px;
+            padding: 16px; margin-bottom: 16px;
+        }
+        .widget-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
+        .villochat-btn {
+            display: flex; align-items: center; gap: 10px;
+            background: #075e54; color: white; border: none;
+            border-radius: 9999px; padding: 12px 20px; font-size: 15px;
+            font-weight: 700; cursor: pointer; font-family: var(--font);
+            width: 100%; transition: background .2s;
+        }
+        .villochat-btn:hover { background: #064f47; }
+
+        /* ─── LOADING / STATES ─── */
+        .loading-spinner {
+            display: flex; align-items: center; justify-content: center;
+            padding: 40px; color: var(--text-muted); gap: 10px;
+        }
+        .spinner {
+            width: 24px; height: 24px; border: 3px solid var(--border);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 15px; }
+        .empty-state h3 { font-size: 24px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+
+        /* ─── NOTIFICATION TOAST ─── */
+        #toast {
+            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--accent); color: white; padding: 12px 24px;
+            border-radius: 9999px; font-size: 14px; font-weight: 600;
+            z-index: 9999; transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+            pointer-events: none;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.error { background: #f4212e; }
+
+        /* ─── MODAL ─── */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.6);
+            z-index: 1000; display: flex; align-items: flex-start;
+            justify-content: center; padding-top: 64px; overflow-y: auto;
+        }
+        .modal-box {
+            background: var(--bg); border-radius: 16px; width: 100%;
+            max-width: 600px; position: relative;
+        }
+        .modal-header {
+            display: flex; align-items: center; gap: 16px;
+            padding: 12px 16px; border-bottom: 1px solid var(--border);
+        }
+        .modal-close {
+            background: none; border: none; color: var(--text); font-size: 20px;
+            cursor: pointer; border-radius: 50%; padding: 6px; line-height: 1;
+        }
+        .modal-close:hover { background: var(--bg-hover); }
+        .modal-title { font-size: 20px; font-weight: 700; }
+
+        /* ─── PROFILE PAGE ─── */
+        .profile-banner {
+            height: 160px; background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+        }
+        .profile-info { padding: 16px; }
+        .profile-avatar-wrap {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 4px solid var(--bg); overflow: hidden;
+            background: var(--accent); display: flex; align-items: center;
+            justify-content: center; font-size: 28px; font-weight: 700;
+            color: white; margin-top: -40px; margin-bottom: 12px;
+        }
+        .profile-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { font-size: 20px; font-weight: 800; }
+        .profile-handle { color: var(--text-muted); font-size: 15px; margin-bottom: 12px; }
+        .profile-stats { display: flex; gap: 20px; font-size: 14px; margin-top: 12px; }
+        .profile-stat span { color: var(--text-muted); }
+        .profile-stat strong { color: var(--text); }
+
+        /* ─── MOBILE / BOTTOM NAV ─── */
+        #mobile-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--bg); border-top: 1px solid var(--border);
+            padding: 8px 0; z-index: 100;
+        }
+        .mobile-nav-inner { display: flex; }
+        .mobile-nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            padding: 8px; cursor: pointer; color: var(--text-muted);
+            font-size: 24px; border: none; background: none;
+        }
+        .mobile-nav-item.active { color: var(--text); }
+
+        @media (max-width: 1100px) { #widgets { display: none; } }
+        @media (max-width: 700px) {
+            #sidebar { display: none; }
+            #mobile-nav { display: flex; }
+            #main { padding-bottom: 60px; border-right: none; }
+            .compose-textarea { font-size: 16px; }
+            .nav-label { display: none; }
+        }
+        @media (min-width: 700px) and (max-width: 900px) {
+            #sidebar { width: 72px; }
+            .nav-label { display: none; }
+            .sidebar-user-info { display: none; }
+            .nav-post-btn span { display: none; }
+        }
+
+        /* ─── SHARE TO VILLOCHAT ─── */
+        .share-villochat-btn {
+            display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+            border-radius: 9999px; cursor: pointer; font-size: 13px;
+            color: #075e54; background: none; border: none;
+            font-family: var(--font); transition: color .15s, background .15s;
+        }
+        .share-villochat-btn:hover { background: rgba(7,94,84,.1); }
+
+        /* ─── TRENDING ─── */
+        .trend-item { padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+        .trend-item:last-child { border-bottom: none; }
+        .trend-item:hover { background: none; }
+        .trend-category { font-size: 13px; color: var(--text-muted); }
+        .trend-name { font-size: 15px; font-weight: 700; }
+        .trend-count { font-size: 13px; color: var(--text-muted); }
+
+        input::-webkit-input-placeholder { color: var(--text-muted) !important; }
+        textarea::-webkit-input-placeholder { color: var(--text-muted) !important; }
+    </style>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<!-- ─── LOGIN SCREEN ─── -->
+<div id="login-screen">
+    <div class="login-box">
+        <div class="login-logo"><svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#1d9bf0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 0 1 6 6c0 .6-.1 1.2-.2 1.8C19.3 10.6 21 12.2 21 14c0 2-1.8 3.5-4 3.5-.3 0-.6 0-.9-.1l-.3 1.9c-.2 1.4-1.4 2.4-2.8 2.7V22h-2v-.1C9.6 21.6 8.4 20.6 8.2 19.3l-.3-1.9c-.3.1-.6.1-.9.1C4.8 17.5 3 16 3 14c0-1.8 1.7-3.4 3.2-4.2C6.1 9.2 6 8.6 6 8a6 6 0 0 1 6-6z"/><path d="M9 15c0 1.7.7 3.2 1.8 4.3"/><path d="M15 15c0 1.7-.7 3.2-1.8 4.3"/></svg></div>
+        <div class="login-title">Willkommen bei Octoverse</div>
+        <div class="login-sub">Melde dich mit deinem VilloChat-Konto an</div>
+        <input class="login-input" id="login-user" type="text" placeholder="VilloChat-Nutzername" autocomplete="username">
+        <input class="login-input" id="login-pin" type="password" placeholder="PIN (xxxx-xxxx)" maxlength="9" autocomplete="current-password">
+        <div id="login-hint" style="font-size:13px; color:var(--text-muted); margin-bottom:8px; display:none;"></div>
+        <button class="login-btn" id="login-btn" onclick="doLogin()">Anmelden</button>
+        <div class="login-note">Noch kein Konto? Registriere dich zuerst in <strong>VilloChat</strong>.</div>
+    </div>
+</div>
+
+<!-- ─── MAIN APP ─── -->
+<div id="app" style="display:none;">
+
+    <!-- SIDEBAR -->
+    <nav id="sidebar">
+        <div class="sidebar-logo"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1d9bf0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 0 1 6 6c0 .6-.1 1.2-.2 1.8C19.3 10.6 21 12.2 21 14c0 2-1.8 3.5-4 3.5-.3 0-.6 0-.9-.1l-.3 1.9c-.2 1.4-1.4 2.4-2.8 2.7V22h-2v-.1C9.6 21.6 8.4 20.6 8.2 19.3l-.3-1.9c-.3.1-.6.1-.9.1C4.8 17.5 3 16 3 14c0-1.8 1.7-3.4 3.2-4.2C6.1 9.2 6 8.6 6 8a6 6 0 0 1 6-6z"/><path d="M9 15c0 1.7.7 3.2 1.8 4.3"/><path d="M15 15c0 1.7-.7 3.2-1.8 4.3"/></svg></div>
+        <a class="nav-item active" id="nav-home" onclick="showFeed()">
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+            <span class="nav-label">Start</span>
+        </a>
+        <a class="nav-item" id="nav-explore" onclick="showExplore()">
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+            <span class="nav-label">Erkunden</span>
+        </a>
+        <a class="nav-item" id="nav-profile" onclick="showProfile()">
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <span class="nav-label">Profil</span>
+        </a>
+        <a class="nav-item" onclick="openVilloChat()">
+            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
+            <span class="nav-label">VilloChat</span>
+        </a>
+        <button class="nav-post-btn" onclick="openComposeModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg><span>Posten</span>
+        </button>
+        <div class="sidebar-user" onclick="showProfile()">
+            <div class="sidebar-avatar" id="sidebar-av"></div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebar-name"></div>
+                <div class="sidebar-user-handle" id="sidebar-handle"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN FEED -->
+    <main id="main">
+        <!-- HOME FEED -->
+        <section id="page-home">
+            <div class="feed-header">
+                <div class="feed-header-inner">
+                    <span class="feed-title">Start</span>
+                </div>
+                <div class="tab-bar">
+                    <div class="tab active" id="tab-foryou" onclick="switchTab('foryou')">Für dich</div>
+                    <div class="tab" id="tab-following" onclick="switchTab('following')">Folge ich</div>
+                </div>
+            </div>
+            <!-- Compose -->
+            <div class="compose-box" id="compose-inline">
+                <div class="sidebar-avatar" id="compose-av" style="margin-top:4px;"></div>
+                <div class="compose-area">
+                    <textarea class="compose-textarea" id="compose-text" placeholder="Was gibt's Neues?" rows="2" oninput="onComposeInput(this)"></textarea>
+                    <div id="compose-img-preview" style="display:none;">
+                        <div class="compose-image-preview">
+                            <img id="compose-preview-img" src="" alt="">
+                            <button class="compose-image-remove" onclick="removeComposeImage()"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                        </div>
+                    </div>
+                    <div class="compose-toolbar">
+                        <div class="compose-actions">
+                            <button class="compose-action" title="Bild hinzufügen" onclick="document.getElementById('post-img-input').click()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></button>
+                            <input type="file" id="post-img-input" accept="image/*" style="display:none;" onchange="handleComposeImage(this)">
+                        </div>
+                        <span class="compose-char" id="compose-char">500</span>
+                        <button class="compose-submit" id="compose-btn" onclick="submitPost()" disabled>Posten</button>
+                    </div>
+                </div>
+            </div>
+            <div id="feed-container">
+                <div class="loading-spinner"><div class="spinner"></div> Wird geladen…</div>
+            </div>
+        </section>
+
+        <!-- EXPLORE PAGE -->
+        <section id="page-explore" style="display:none;">
+            <div class="feed-header">
+                <div class="feed-header-inner">
+                    <span class="feed-title">Erkunden</span>
+                </div>
+            </div>
+            <div style="padding:16px;">
+                <div class="search-bar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" placeholder="Suche auf Octoverse" id="explore-search" oninput="doExploreSearch(this.value)">
+                </div>
+            </div>
+            <div id="explore-container">
+                <div id="explore-posts"></div>
+            </div>
+        </section>
+
+        <!-- PROFILE PAGE -->
+        <section id="page-profile" style="display:none;">
+            <div class="feed-header">
+                <div class="feed-header-inner">
+                    <button style="background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;margin-right:8px;" onclick="showFeed()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+                    <span class="feed-title" id="profile-page-title">Profil</span>
+                </div>
+            </div>
+            <div class="profile-banner"></div>
+            <div class="profile-info">
+                <div class="profile-avatar-wrap" id="profile-av"></div>
+                <div class="profile-name" id="profile-name-display"></div>
+                <div class="profile-handle" id="profile-handle-display"></div>
+                <div class="profile-stats">
+                    <div class="profile-stat"><strong id="profile-post-count">0</strong> <span>Posts</span></div>
+                </div>
+            </div>
+            <div class="tab-bar" style="border-top:1px solid var(--border);">
+                <div class="tab active">Posts</div>
+            </div>
+            <div id="profile-posts-container"></div>
+        </section>
+    </main>
+
+    <!-- WIDGETS -->
+    <aside id="widgets">
+        <div class="widget-search">
+            <div class="search-bar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" placeholder="Suche auf Octoverse" oninput="doExploreSearch(this.value)">
+            </div>
+        </div>
+        <div class="widget-card">
+            <div class="widget-title">VilloChat öffnen</div>
+            <button class="villochat-btn" onclick="openVilloChat()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> VilloChat öffnen</button>
+        </div>
+        <div class="widget-card" id="trending-widget">
+            <div class="widget-title">Trends</div>
+            <div id="trending-list"></div>
+        </div>
+    </aside>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div id="mobile-nav">
+    <div class="mobile-nav-inner">
+        <button class="mobile-nav-item active" id="mnav-home" onclick="showFeed(); setMobileNav('home')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+        <button class="mobile-nav-item" id="mnav-explore" onclick="showExplore(); setMobileNav('explore')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+        <button class="mobile-nav-item" onclick="openComposeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
+        <button class="mobile-nav-item" id="mnav-profile" onclick="showProfile(); setMobileNav('profile')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+        <button class="mobile-nav-item" onclick="openVilloChat()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></button>
+    </div>
+</div>
+
+<!-- COMPOSE MODAL -->
+<div class="modal-overlay" id="compose-modal" style="display:none;" onclick="if(event.target===this)closeComposeModal()">
+    <div class="modal-box">
+        <div class="modal-header">
+            <button class="modal-close" onclick="closeComposeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+            <span class="modal-title">Neuer Post</span>
+        </div>
+        <div class="compose-box">
+            <div class="sidebar-avatar" id="modal-compose-av"></div>
+            <div class="compose-area">
+                <textarea class="compose-textarea" id="modal-compose-text" placeholder="Was gibt's Neues?" rows="4" oninput="onModalComposeInput(this)"></textarea>
+                <div id="modal-compose-img-preview" style="display:none;">
+                    <div class="compose-image-preview">
+                        <img id="modal-compose-preview-img" src="" alt="">
+                        <button class="compose-image-remove" onclick="removeModalComposeImage()"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+                    </div>
+                </div>
+                <div class="compose-toolbar">
+                    <div class="compose-actions">
+                        <button class="compose-action" onclick="document.getElementById('modal-post-img-input').click()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></button>
+                        <input type="file" id="modal-post-img-input" accept="image/*" style="display:none;" onchange="handleModalComposeImage(this)">
+                    </div>
+                    <span class="compose-char" id="modal-compose-char">500</span>
+                    <button class="compose-submit" id="modal-compose-btn" onclick="submitModalPost()" disabled>Posten</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- COMMENTS MODAL -->
+<div class="modal-overlay" id="comments-modal" style="display:none;" onclick="if(event.target===this)closeCommentsModal()">
+    <div class="modal-box">
+        <div class="modal-header">
+            <button class="modal-close" onclick="closeCommentsModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+            <span class="modal-title">Post</span>
+        </div>
+        <div id="comments-post-content"></div>
+        <div class="comment-section">
+            <div class="comment-input-row">
+                <div class="comment-avatar" id="comments-my-av"></div>
+                <textarea class="comment-input" id="comment-input" placeholder="Antworte auf diesen Post…" rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+                <button class="comment-send" id="comment-send-btn" onclick="submitComment()" disabled>Antworten</button>
+            </div>
+            <div id="comments-list"></div>
+        </div>
+    </div>
+</div>
+
+<!-- SHARE TO VILLOCHAT MODAL -->
+<div class="modal-overlay" id="share-modal" style="display:none;" onclick="if(event.target===this)closeShareModal()">
+    <div class="modal-box" style="max-width:420px;">
+        <div class="modal-header">
+            <button class="modal-close" onclick="closeShareModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+            <span class="modal-title">Via VilloChat teilen</span>
+        </div>
+        <div style="padding:16px;">
+            <p style="color:var(--text-muted);font-size:14px;margin-bottom:12px;">Wähle einen VilloChat-Kontakt:</p>
+            <div id="share-contacts-list"></div>
+        </div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+    getDatabase, ref, set, get, push, update,
+    onChildAdded, onValue, off, remove, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB3wZU09SzNh7xZFPFjPHR9nhDCWkGzj7E",
+    authDomain: "villochat.firebaseapp.com",
+    databaseURL: "https://villochat-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "villochat",
+    storageBucket: "villochat.firebasedata.app",
+    messagingSenderId: "257561919332",
+    appId: "1:257561919332:web:712d942c2f2e07169e8471"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// ─── STATE ───
+let myUsername = "";
+let myAvatarData = null; // base64
+let currentTab = "foryou";
+let composeImageData = null;
+let modalComposeImageData = null;
+let currentPostId = null; // for comments modal
+let currentSharePost = null;
+let feedListener = null;
+const MAX_BYTES = 1024 * 1024; // 1 MB
+const MAX_CHARS = 500;
+
+// ─── HELPERS ───
+function toast(msg, type = "") {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "show" + (type ? " " + type : "");
+    setTimeout(() => { t.className = ""; }, 3000);
+}
+
+function timeAgo(ts) {
+    const diff = Date.now() - ts;
+    if (diff < 60000) return "jetzt";
+    if (diff < 3600000) return Math.floor(diff / 60000) + " Min.";
+    if (diff < 86400000) return Math.floor(diff / 3600000) + " Std.";
+    return Math.floor(diff / 86400000) + " T.";
+}
+
+function escHtml(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function stringToColor(s) {
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) hash = s.charCodeAt(i) + ((hash << 5) - hash);
+    return `hsl(${Math.abs(hash) % 360}, 55%, 45%)`;
+}
+
+async function compressImage(file, maxBytes) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            const canvas = document.createElement("canvas");
+            let { width, height } = img;
+            const maxDim = 1200;
+            if (width > maxDim || height > maxDim) {
+                const scale = Math.min(maxDim / width, maxDim / height);
+                width = Math.round(width * scale);
+                height = Math.round(height * scale);
+            }
+            const tryCompress = (w, h) => {
+                canvas.width = w; canvas.height = h;
+                canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                let quality = 0.85, result;
+                do {
+                    result = canvas.toDataURL("image/jpeg", quality);
+                    quality -= 0.1;
+                } while (result.length > maxBytes * 1.37 && quality > 0.1);
+                if (result.length > maxBytes * 1.37 && w > 200) return tryCompress(Math.round(w * 0.7), Math.round(h * 0.7));
+                return result;
+            };
+            resolve(tryCompress(width, height));
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+        img.src = url;
+    });
+}
+
+// ─── AVATAR HTML ───
+function avatarHTML(username, imageData, size = 40, fontSize = 16) {
+    if (imageData && imageData.startsWith("data:")) {
+        return `<img src="${imageData}" style="width:100%;height:100%;object-fit:cover;" alt="">`;
+    }
+    const color = stringToColor(username);
+    const letter = (username[0] || "?").toUpperCase();
+    return `<span style="background:${color};width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:700;color:white;">${letter}</span>`;
+}
+
+// ─── AVATAR CACHE ───
+const avatarCache = {};
+async function getAvatar(username) {
+    if (avatarCache[username] !== undefined) return avatarCache[username];
+    try {
+        const snap = await get(ref(db, `accounts/${username}/avatar`));
+        const data = snap.exists() ? snap.val() : null;
+        avatarCache[username] = data;
+        return data;
+    } catch { avatarCache[username] = null; return null; }
+}
+
+// ─── AUTH ───
+window.doLogin = async function() {
+    const u = document.getElementById("login-user").value.trim();
+    const p = document.getElementById("login-pin").value;
+    if (!u || p.length < 9) { toast("Bitte alle Felder ausfüllen.", "error"); return; }
+    const btn = document.getElementById("login-btn");
+    btn.textContent = "…"; btn.disabled = true;
+    try {
+        const snap = await get(ref(db, "accounts/" + u));
+        if (!snap.exists() || snap.val().pin !== p) {
+            toast("Falscher Nutzername oder PIN.", "error");
+            btn.textContent = "Anmelden"; btn.disabled = false;
+            return;
+        }
+        await signInAnonymously(auth);
+        myUsername = u;
+        localStorage.setItem("ov_session", u);
+        await initApp();
+    } catch (e) {
+        toast("Fehler: " + e.message, "error");
+        btn.textContent = "Anmelden"; btn.disabled = false;
+    }
+};
+
+document.getElementById("login-pin").addEventListener("input", function(e) {
+    let v = e.target.value.replace(/[^0-9]/g,"");
+    if (v.length > 4) v = v.slice(0,4) + "-" + v.slice(4,8);
+    e.target.value = v;
+});
+document.getElementById("login-pin").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") window.doLogin();
+});
+document.getElementById("login-user").addEventListener("blur", async function() {
+    const u = this.value.trim(); if (!u) return;
+    const snap = await get(ref(db, `accounts/${u}/pinHint`));
+    const el = document.getElementById("login-hint");
+    if (snap.exists() && snap.val()) { el.textContent = "Hinweis: " + snap.val(); el.style.display = "block"; }
+    else el.style.display = "none";
+});
+
+// ─── INIT APP ───
+async function initApp() {
+    myAvatarData = await getAvatar(myUsername);
+
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    document.getElementById("mobile-nav").style.display = "flex";
+
+    // Sidebar user
+    const sav = document.getElementById("sidebar-av");
+    sav.style.background = stringToColor(myUsername);
+    sav.innerHTML = avatarHTML(myUsername, myAvatarData, 40, 16);
+    document.getElementById("sidebar-name").textContent = myUsername;
+    document.getElementById("sidebar-handle").textContent = "@" + myUsername;
+
+    // Compose avatars
+    const cav = document.getElementById("compose-av");
+    cav.style.background = stringToColor(myUsername);
+    cav.innerHTML = avatarHTML(myUsername, myAvatarData, 40, 16);
+    const mcav = document.getElementById("modal-compose-av");
+    mcav.style.background = stringToColor(myUsername);
+    mcav.innerHTML = avatarHTML(myUsername, myAvatarData, 40, 16);
+    const cmav = document.getElementById("comments-my-av");
+    cmav.style.background = stringToColor(myUsername);
+    cmav.innerHTML = avatarHTML(myUsername, myAvatarData, 40, 16);
+
+    loadFeed();
+    loadTrending();
+
+    // comment input enable
+    document.getElementById("comment-input").addEventListener("input", function() {
+        document.getElementById("comment-send-btn").disabled = !this.value.trim();
+    });
+}
+
+// ─── AUTO LOGIN ───
+(async () => {
+    const saved = localStorage.getItem("ov_session");
+    if (saved) {
+        const snap = await get(ref(db, "accounts/" + saved));
+        if (snap.exists()) {
+            myUsername = saved;
+            await signInAnonymously(auth);
+            await initApp();
+        }
+    }
+})();
+
+// ─── FEED ───
+function loadFeed() {
+    const container = document.getElementById("feed-container");
+    container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+    if (feedListener) { off(ref(db, "octoverse/posts"), feedListener); feedListener = null; }
+
+    const postsRef = ref(db, "octoverse/posts");
+    const posts = {};
+
+    onValue(postsRef, async (snap) => {
+        if (!snap.exists()) {
+            container.innerHTML = '<div class="empty-state"><h3>Noch keine Posts</h3><p>Sei der Erste und poste etwas!</p></div>';
+            return;
+        }
+        const data = snap.val();
+        const sorted = Object.entries(data).sort((a,b) => b[1].timestamp - a[1].timestamp);
+        container.innerHTML = "";
+        for (const [id, post] of sorted) {
+            const el = await buildPostEl(id, post);
+            container.appendChild(el);
+        }
+    });
+}
+
+async function buildPostEl(id, post) {
+    const av = await getAvatar(post.author);
+    const div = document.createElement("div");
+    div.className = "post";
+    div.dataset.postId = id;
+
+    const myLike = post.likes && post.likes[myUsername];
+    const likeCount = post.likes ? Object.keys(post.likes).length : 0;
+    const commentCount = post.comments ? Object.keys(post.comments).length : 0;
+
+    div.innerHTML = `
+        <div class="post-avatar" style="background:${stringToColor(post.author)}">
+            ${avatarHTML(post.author, av, 40, 16)}
+        </div>
+        <div class="post-body">
+            <div class="post-header">
+                <span class="post-name">${escHtml(post.author)}</span>
+                <span class="post-handle">@${escHtml(post.author)}</span>
+                <span class="post-dot">·</span>
+                <span class="post-time">${timeAgo(post.timestamp)}</span>
+            </div>
+            ${post.text ? `<div class="post-text">${escHtml(post.text)}</div>` : ""}
+            ${post.image ? `<div class="post-image"><img src="${post.image}" alt="" loading="lazy"></div>` : ""}
+            <div class="post-actions">
+                <button class="post-action comment" onclick="openComments('${id}');event.stopPropagation();">
+                    <span class="post-action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
+                    <span class="post-count">${commentCount || ""}</span>
+                </button>
+                <button class="post-action like ${myLike ? "liked" : ""}" onclick="toggleLike('${id}');event.stopPropagation();" id="like-btn-${id}">
+                    <span class="post-action-icon">${myLike ? "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>" : "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>"}</span>
+                    <span class="post-count" id="like-count-${id}">${likeCount || ""}</span>
+                </button>
+                <button class="share-villochat-btn" onclick="openShareModal('${id}');event.stopPropagation();" title="Via VilloChat teilen">
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
+                </button>
+                ${post.author === myUsername ? `<button class="post-action" onclick="deletePost('${id}');event.stopPropagation();" style="color:var(--text-muted);margin-left:auto;max-width:40px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : ""}
+            </div>
+        </div>`;
+
+    div.addEventListener("click", () => openComments(id));
+    return div;
+}
+
+// ─── COMPOSE ───
+let composeChars = MAX_CHARS;
+window.onComposeInput = function(el) {
+    composeChars = MAX_CHARS - el.value.length;
+    const charEl = document.getElementById("compose-char");
+    charEl.textContent = composeChars;
+    charEl.className = "compose-char" + (composeChars < 0 ? " over" : composeChars < 50 ? " warn" : "");
+    document.getElementById("compose-btn").disabled = (el.value.trim() === "" && !composeImageData) || composeChars < 0;
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+};
+
+window.onModalComposeInput = function(el) {
+    const chars = MAX_CHARS - el.value.length;
+    const charEl = document.getElementById("modal-compose-char");
+    charEl.textContent = chars;
+    charEl.className = "compose-char" + (chars < 0 ? " over" : chars < 50 ? " warn" : "");
+    document.getElementById("modal-compose-btn").disabled = (el.value.trim() === "" && !modalComposeImageData) || chars < 0;
+};
+
+window.handleComposeImage = async function(input) {
+    const file = input.files[0]; if (!file) return;
+    composeImageData = await compressImage(file, MAX_BYTES);
+    if (!composeImageData) { toast("Bild konnte nicht geladen werden.", "error"); return; }
+    document.getElementById("compose-preview-img").src = composeImageData;
+    document.getElementById("compose-img-preview").style.display = "block";
+    document.getElementById("compose-btn").disabled = false;
+    input.value = "";
+};
+
+window.removeComposeImage = function() {
+    composeImageData = null;
+    document.getElementById("compose-img-preview").style.display = "none";
+    document.getElementById("compose-preview-img").src = "";
+    const txt = document.getElementById("compose-text").value;
+    document.getElementById("compose-btn").disabled = txt.trim() === "";
+};
+
+window.handleModalComposeImage = async function(input) {
+    const file = input.files[0]; if (!file) return;
+    modalComposeImageData = await compressImage(file, MAX_BYTES);
+    if (!modalComposeImageData) { toast("Bild konnte nicht geladen werden.", "error"); return; }
+    document.getElementById("modal-compose-preview-img").src = modalComposeImageData;
+    document.getElementById("modal-compose-img-preview").style.display = "block";
+    document.getElementById("modal-compose-btn").disabled = false;
+    input.value = "";
+};
+
+window.removeModalComposeImage = function() {
+    modalComposeImageData = null;
+    document.getElementById("modal-compose-img-preview").style.display = "none";
+    const txt = document.getElementById("modal-compose-text").value;
+    document.getElementById("modal-compose-btn").disabled = txt.trim() === "";
+};
+
+async function doPost(text, image) {
+    const postRef = push(ref(db, "octoverse/posts"));
+    const postData = { author: myUsername, text: text || "", timestamp: Date.now() };
+    if (image) postData.image = image;
+    await set(postRef, postData);
+    toast("Post veröffentlicht!");
+}
+
+window.submitPost = async function() {
+    const text = document.getElementById("compose-text").value.trim();
+    if (!text && !composeImageData) return;
+    const btn = document.getElementById("compose-btn");
+    btn.disabled = true; btn.textContent = "…";
+    try {
+        await doPost(text, composeImageData);
+        document.getElementById("compose-text").value = "";
+        document.getElementById("compose-char").textContent = MAX_CHARS;
+        composeImageData = null;
+        document.getElementById("compose-img-preview").style.display = "none";
+    } catch(e) { toast("Fehler: " + e.message, "error"); }
+    btn.textContent = "Posten"; btn.disabled = true;
+};
+
+window.submitModalPost = async function() {
+    const text = document.getElementById("modal-compose-text").value.trim();
+    if (!text && !modalComposeImageData) return;
+    const btn = document.getElementById("modal-compose-btn");
+    btn.disabled = true; btn.textContent = "…";
+    try {
+        await doPost(text, modalComposeImageData);
+        document.getElementById("modal-compose-text").value = "";
+        document.getElementById("modal-compose-char").textContent = MAX_CHARS;
+        modalComposeImageData = null;
+        document.getElementById("modal-compose-img-preview").style.display = "none";
+        closeComposeModal();
+    } catch(e) { toast("Fehler: " + e.message, "error"); }
+    btn.textContent = "Posten"; btn.disabled = true;
+};
+
+// ─── LIKES ───
+window.toggleLike = async function(postId) {
+    const likeRef = ref(db, `octoverse/posts/${postId}/likes/${myUsername}`);
+    const snap = await get(likeRef);
+    if (snap.exists()) {
+        await remove(likeRef);
+        const btn = document.getElementById("like-btn-" + postId);
+        if (btn) { btn.className = "post-action like"; btn.querySelector(".post-action-icon").textContent = "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>"; }
+    } else {
+        await set(likeRef, true);
+        const btn = document.getElementById("like-btn-" + postId);
+        if (btn) { btn.className = "post-action like liked"; btn.querySelector(".post-action-icon").textContent = "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>"; }
+    }
+    // Update count
+    const countSnap = await get(ref(db, `octoverse/posts/${postId}/likes`));
+    const count = countSnap.exists() ? Object.keys(countSnap.val()).length : 0;
+    const countEl = document.getElementById("like-count-" + postId);
+    if (countEl) countEl.textContent = count || "";
+};
+
+// ─── DELETE POST ───
+window.deletePost = async function(postId) {
+    if (!confirm("Post löschen?")) return;
+    await remove(ref(db, `octoverse/posts/${postId}`));
+    toast("Post gelöscht.");
+};
+
+// ─── COMMENTS ───
+window.openComments = async function(postId) {
+    currentPostId = postId;
+    const snap = await get(ref(db, `octoverse/posts/${postId}`));
+    if (!snap.exists()) return;
+    const post = snap.val();
+
+    // Render post in modal
+    const av = await getAvatar(post.author);
+    const myLike = post.likes && post.likes[myUsername];
+    const likeCount = post.likes ? Object.keys(post.likes).length : 0;
+    const commentCount = post.comments ? Object.keys(post.comments).length : 0;
+
+    document.getElementById("comments-post-content").innerHTML = `
+        <div class="post" style="cursor:default;">
+            <div class="post-avatar" style="background:${stringToColor(post.author)}">
+                ${avatarHTML(post.author, av, 40, 16)}
+            </div>
+            <div class="post-body">
+                <div class="post-header">
+                    <span class="post-name">${escHtml(post.author)}</span>
+                    <span class="post-handle">@${escHtml(post.author)}</span>
+                    <span class="post-dot">·</span>
+                    <span class="post-time">${timeAgo(post.timestamp)}</span>
+                </div>
+                ${post.text ? `<div class="post-text">${escHtml(post.text)}</div>` : ""}
+                ${post.image ? `<div class="post-image"><img src="${post.image}" alt="" loading="lazy"></div>` : ""}
+                <div class="post-actions">
+                    <button class="post-action comment">
+                        <span class="post-action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
+                        <span class="post-count">${commentCount || ""}</span>
+                    </button>
+                    <button class="post-action like ${myLike ? "liked" : ""}" onclick="toggleLike('${postId}')">
+                        <span class="post-action-icon">${myLike ? "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>" : "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>"}</span>
+                        <span class="post-count">${likeCount || ""}</span>
+                    </button>
+                    <button class="share-villochat-btn" onclick="openShareModal('${postId}')">
+                        <span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span> VilloChat
+                    </button>
+                </div>
+            </div>
+        </div>`;
+
+    // Load comments
+    await loadComments(postId);
+
+    document.getElementById("comment-input").value = "";
+    document.getElementById("comment-send-btn").disabled = true;
+    document.getElementById("comments-modal").style.display = "flex";
+};
+
+async function loadComments(postId) {
+    const snap = await get(ref(db, `octoverse/posts/${postId}/comments`));
+    const list = document.getElementById("comments-list");
+    if (!snap.exists()) { list.innerHTML = '<div class="empty-state" style="padding:24px;">Noch keine Antworten.</div>'; return; }
+    const comments = snap.val();
+    const sorted = Object.entries(comments).sort((a,b) => a[1].timestamp - b[1].timestamp);
+    list.innerHTML = "";
+    for (const [cid, c] of sorted) {
+        const av = await getAvatar(c.author);
+        const div = document.createElement("div");
+        div.className = "comment";
+        div.innerHTML = `
+            <div class="comment-avatar" style="background:${stringToColor(c.author)}">
+                ${avatarHTML(c.author, av, 32, 13)}
+            </div>
+            <div class="comment-body">
+                <div class="comment-header">
+                    <strong>${escHtml(c.author)}</strong>
+                    <span> · ${timeAgo(c.timestamp)}</span>
+                </div>
+                <div class="comment-text">${escHtml(c.text)}</div>
+            </div>`;
+        list.appendChild(div);
+    }
+}
+
+window.submitComment = async function() {
+    if (!currentPostId) return;
+    const text = document.getElementById("comment-input").value.trim();
+    if (!text) return;
+    const btn = document.getElementById("comment-send-btn");
+    btn.disabled = true; btn.textContent = "…";
+    try {
+        const commentRef = push(ref(db, `octoverse/posts/${currentPostId}/comments`));
+        await set(commentRef, { author: myUsername, text, timestamp: Date.now() });
+        document.getElementById("comment-input").value = "";
+        await loadComments(currentPostId);
+        toast("Antwort gepostet!");
+    } catch(e) { toast("Fehler: " + e.message, "error"); }
+    btn.textContent = "Antworten";
+};
+
+window.closeCommentsModal = function() {
+    document.getElementById("comments-modal").style.display = "none";
+    currentPostId = null;
+};
+
+// ─── SHARE TO VILLOCHAT ───
+window.openShareModal = async function(postId) {
+    currentSharePost = postId;
+    const snap = await get(ref(db, `accounts/${myUsername}/contacts`));
+    const list = document.getElementById("share-contacts-list");
+    if (!snap.exists()) {
+        list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Keine VilloChat-Kontakte gefunden.</p>';
+    } else {
+        const contacts = Object.keys(snap.val());
+        list.innerHTML = "";
+        for (const c of contacts) {
+            const av = await getAvatar(c);
+            const btn = document.createElement("button");
+            btn.style.cssText = "display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;color:var(--text);font-family:var(--font);font-size:15px;padding:10px 0;cursor:pointer;border-bottom:1px solid var(--border);";
+            btn.innerHTML = `<div style="width:36px;height:36px;border-radius:50%;background:${stringToColor(c)};overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:white;">${avatarHTML(c, av, 36, 14)}</div><span>${escHtml(c)}</span>`;
+            btn.onclick = () => sendShareToContact(c);
+            list.appendChild(btn);
+        }
+    }
+    document.getElementById("share-modal").style.display = "flex";
+};
+
+async function sendShareToContact(contactName) {
+    if (!currentSharePost) return;
+    const postSnap = await get(ref(db, `octoverse/posts/${currentSharePost}`));
+    if (!postSnap.exists()) return;
+    const post = postSnap.val();
+
+    const chatId = myUsername < contactName
+        ? `${myUsername}_${contactName}`
+        : `${contactName}_${myUsername}`;
+
+    const msgText = `🐙 *Octoverse-Post von @${post.author}*:\n${post.text || ""}`;
+    const msgRef = push(ref(db, `messages/${chatId}`));
+    const msgData = { sender: myUsername, text: msgText, timestamp: Date.now(), read: false };
+    if (post.image) { msgData.isImage = true; msgData.text = post.image; }
+    await set(msgRef, msgData);
+
+    // Also send a text preview if there was also an image
+    if (post.image && post.text) {
+        const txtRef = push(ref(db, `messages/${chatId}`));
+        await set(txtRef, { sender: myUsername, text: `🐙 @${post.author}: ${post.text}`, timestamp: Date.now() + 1, read: false });
+    }
+
+    closeShareModal();
+    toast(`An @${contactName} gesendet!`);
+}
+
+window.closeShareModal = function() {
+    document.getElementById("share-modal").style.display = "none";
+    currentSharePost = null;
+};
+
+// ─── NAVIGATION ───
+function setActivePage(id) {
+    ["page-home","page-explore","page-profile"].forEach(p => {
+        document.getElementById(p).style.display = p === id ? "block" : "none";
+    });
+}
+function setActiveNav(id) {
+    ["nav-home","nav-explore","nav-profile"].forEach(n => {
+        const el = document.getElementById(n);
+        if (el) el.classList.toggle("active", n === id);
+    });
+}
+
+window.showFeed = function() {
+    setActivePage("page-home"); setActiveNav("nav-home");
+};
+window.showExplore = function() {
+    setActivePage("page-explore"); setActiveNav("nav-explore");
+    loadAllPostsForExplore();
+};
+window.showProfile = async function() {
+    setActivePage("page-profile"); setActiveNav("nav-profile");
+    await loadProfilePage(myUsername);
+};
+window.openVilloChat = function() {
+    window.open("villochat-v.html", "_blank");
+};
+
+window.switchTab = function(tab) {
+    currentTab = tab;
+    document.getElementById("tab-foryou").className = "tab" + (tab === "foryou" ? " active" : "");
+    document.getElementById("tab-following").className = "tab" + (tab === "following" ? " active" : "");
+    loadFeed();
+};
+
+window.setMobileNav = function(which) {
+    ["home","explore","profile"].forEach(n => {
+        const el = document.getElementById("mnav-" + n);
+        if (el) el.classList.toggle("active", n === which);
+    });
+};
+
+// ─── COMPOSE MODAL ───
+window.openComposeModal = function() {
+    document.getElementById("compose-modal").style.display = "flex";
+    setTimeout(() => document.getElementById("modal-compose-text").focus(), 100);
+};
+window.closeComposeModal = function() {
+    document.getElementById("compose-modal").style.display = "none";
+};
+
+// ─── EXPLORE / SEARCH ───
+let allPostsCache = [];
+async function loadAllPostsForExplore() {
+    const snap = await get(ref(db, "octoverse/posts"));
+    if (!snap.exists()) { document.getElementById("explore-posts").innerHTML = '<div class="empty-state"><h3>Keine Posts</h3></div>'; return; }
+    allPostsCache = Object.entries(snap.val()).sort((a,b) => b[1].timestamp - a[1].timestamp);
+    renderExplorePosts(allPostsCache);
+}
+
+async function renderExplorePosts(posts) {
+    const container = document.getElementById("explore-posts");
+    container.innerHTML = "";
+    for (const [id, post] of posts) {
+        const el = await buildPostEl(id, post);
+        container.appendChild(el);
+    }
+}
+
+window.doExploreSearch = function(query) {
+    if (!query) { renderExplorePosts(allPostsCache); return; }
+    const q = query.toLowerCase();
+    const filtered = allPostsCache.filter(([,p]) =>
+        p.text?.toLowerCase().includes(q) || p.author?.toLowerCase().includes(q)
+    );
+    renderExplorePosts(filtered);
+};
+
+// ─── PROFILE ───
+async function loadProfilePage(username) {
+    document.getElementById("profile-page-title").textContent = username;
+    document.getElementById("profile-name-display").textContent = username;
+    document.getElementById("profile-handle-display").textContent = "@" + username;
+
+    const av = await getAvatar(username);
+    const avEl = document.getElementById("profile-av");
+    avEl.style.background = stringToColor(username);
+    avEl.innerHTML = avatarHTML(username, av, 80, 28);
+
+    // Load user posts
+    const snap = await get(ref(db, "octoverse/posts"));
+    const container = document.getElementById("profile-posts-container");
+    if (!snap.exists()) { container.innerHTML = '<div class="empty-state"><p>Noch keine Posts.</p></div>'; return; }
+    const posts = Object.entries(snap.val())
+        .filter(([,p]) => p.author === username)
+        .sort((a,b) => b[1].timestamp - a[1].timestamp);
+    document.getElementById("profile-post-count").textContent = posts.length;
+    container.innerHTML = "";
+    for (const [id, post] of posts) {
+        const el = await buildPostEl(id, post);
+        container.appendChild(el);
+    }
+}
+
+// ─── TRENDING ───
+async function loadTrending() {
+    const snap = await get(ref(db, "octoverse/posts"));
+    if (!snap.exists()) return;
+    const words = {};
+    Object.values(snap.val()).forEach(p => {
+        if (!p.text) return;
+        p.text.split(/\s+/).forEach(w => {
+            if (w.startsWith("#") && w.length > 1) {
+                words[w] = (words[w] || 0) + 1;
+            }
+        });
+    });
+    const sorted = Object.entries(words).sort((a,b) => b[1]-a[1]).slice(0,5);
+    const list = document.getElementById("trending-list");
+    if (!sorted.length) { list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Keine Trends</p>'; return; }
+    list.innerHTML = sorted.map(([tag, count], i) => `
+        <div class="trend-item">
+            <div class="trend-category">Trend #${i+1}</div>
+            <div class="trend-name">${escHtml(tag)}</div>
+            <div class="trend-count">${count} Posts</div>
+        </div>`).join("");
+}
+</script>
+</body>
+</html>
