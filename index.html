@@ -6,8 +6,6 @@
     <meta name="description" content="Octoverse – Das soziale Netzwerk für VilloChat-Nutzer">
     <meta property="og:title" content="Octoverse">
     <meta property="og:description" content="Posts, Likes, Kommentare – verknüpft mit VilloChat">
-    <meta property="og:url" content="https://octoverse-social.vercel.app">
-    <link rel="canonical" href="https://octoverse-social.vercel.app">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Octoverse</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d9bf0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2a6 6 0 0 1 6 6c0 .6-.1 1.2-.2 1.8C19.3 10.6 21 12.2 21 14c0 2-1.8 3.5-4 3.5-.3 0-.6 0-.9-.1l-.3 1.9c-.2 1.4-1.4 2.4-2.8 2.7V22h-2v-.1C9.6 21.6 8.4 20.6 8.2 19.3l-.3-1.9c-.3.1-.6.1-.9.1C4.8 17.5 3 16 3 14c0-1.8 1.7-3.4 3.2-4.2C6.1 9.2 6 8.6 6 8a6 6 0 0 1 6-6z'/%3E%3C/svg%3E">
@@ -47,11 +45,23 @@
             font-family: var(--font);
             min-height: 100vh;
             font-size: 15px;
+            transition: background 0.3s, color 0.3s;
         }
 
         /* ─── LAYOUT ─── */
         #app { display: flex; min-height: 100vh; max-width: 1280px; margin: 0 auto; }
-        #sidebar { width: var(--sidebar-width); flex-shrink: 0; border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; padding: 0 12px; }
+        #sidebar { 
+            width: var(--sidebar-width); 
+            flex-shrink: 0; 
+            border-right: 1px solid var(--border); 
+            position: sticky; 
+            top: 0; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 0 12px;
+            overflow-y: auto;
+        }
         #main { flex: 1; border-right: 1px solid var(--border); min-height: 100vh; }
         #widgets { width: 350px; flex-shrink: 0; padding: 0 24px; }
 
@@ -82,12 +92,23 @@
             transition: opacity .2s;
         }
         .login-btn:hover { opacity: .85; }
+        .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .login-btn.outline {
             background: transparent; border: 1px solid var(--border);
             color: var(--text); margin-top: 0;
         }
         .login-divider { text-align: center; color: var(--text-muted); margin: 16px 0; font-size: 14px; }
         .login-note { font-size: 13px; color: var(--text-muted); text-align: center; margin-top: 16px; }
+        .login-error {
+            background: rgba(249, 24, 128, 0.1);
+            border: 1px solid var(--accent-like);
+            color: var(--accent-like);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            text-align: center;
+        }
 
         /* ─── SIDEBAR ─── */
         .sidebar-logo { font-size: 30px; padding: 12px 12px 4px; }
@@ -126,6 +147,45 @@
         .sidebar-user-name { font-weight: 700; font-size: 15px; }
         .sidebar-user-handle { color: var(--text-muted); font-size: 14px; }
 
+        /* ─── THEME TOGGLE ─── */
+        .theme-toggle {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; margin: 8px 0;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+        }
+        .theme-toggle-label {
+            font-size: 15px;
+            font-weight: 500;
+            flex: 1;
+        }
+        .theme-toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .theme-toggle-switch.active {
+            background: var(--accent);
+        }
+        .theme-toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        .theme-toggle-switch.active .theme-toggle-slider {
+            transform: translateX(20px);
+        }
+
         /* ─── HEADER ─── */
         .feed-header {
             position: sticky; top: 0; z-index: 10;
@@ -138,10 +198,18 @@
         }
         .feed-title { font-size: 20px; font-weight: 700; flex: 1; }
         .tab-bar { display: flex; border-bottom: 1px solid var(--border); }
-        .tab { flex: 1; padding: 16px; text-align: center; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--text-muted); position: relative; transition: color .2s; }
+        .tab { 
+            flex: 1; padding: 16px; text-align: center; cursor: pointer; 
+            font-size: 15px; font-weight: 500; color: var(--text-muted); 
+            position: relative; transition: color .2s; 
+        }
         .tab:hover { background: var(--bg-hover); color: var(--text); }
         .tab.active { color: var(--text); font-weight: 700; }
-        .tab.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 56px; height: 4px; background: var(--accent); border-radius: 2px; }
+        .tab.active::after { 
+            content: ''; position: absolute; bottom: 0; left: 50%; 
+            transform: translateX(-50%); width: 56px; height: 4px; 
+            background: var(--accent); border-radius: 2px; 
+        }
 
         /* ─── COMPOSE BOX ─── */
         .compose-box {
@@ -153,7 +221,7 @@
             width: 100%; background: transparent; border: none; outline: none;
             color: var(--text); font-size: 20px; font-family: var(--font);
             resize: none; min-height: 52px; max-height: 300px;
-            line-height: 1.4; placeholder-color: var(--text-muted);
+            line-height: 1.4;
         }
         .compose-textarea::placeholder { color: var(--text-muted); }
         .compose-toolbar {
@@ -167,6 +235,7 @@
             transition: background .15s; display: flex; align-items: center;
         }
         .compose-action:hover { background: rgba(29,155,240,.1); }
+        .compose-action:disabled { opacity: 0.5; cursor: not-allowed; }
         .compose-submit {
             background: var(--accent); color: white; border: none;
             border-radius: 9999px; padding: 8px 18px; font-size: 15px;
@@ -174,24 +243,46 @@
             transition: background .2s;
         }
         .compose-submit:hover { background: var(--accent-hover); }
-        .compose-submit:disabled { opacity: .5; cursor: default; }
-        .compose-char { font-size: 13px; color: var(--text-muted); margin-right: 8px; align-self: center; }
-        .compose-char.warn { color: #ffd400; }
-        .compose-char.over { color: #f4212e; }
-        .compose-image-preview {
-            margin-top: 8px; position: relative; display: inline-block;
+        .compose-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+        .compose-char-counter {
+            font-size: 13px; color: var(--text-muted); margin-right: 12px;
         }
-        .compose-image-preview img {
-            max-width: 100%; max-height: 300px; border-radius: 16px;
-            border: 1px solid var(--border);
+        .compose-char-counter.warn { color: #ffd400; }
+        .compose-char-counter.over { color: var(--accent-like); }
+        .image-preview-container {
+            position: relative;
+            margin-top: 12px;
+            border-radius: 16px;
+            overflow: hidden;
+            max-height: 400px;
         }
-        .compose-image-remove {
-            position: absolute; top: 8px; right: 8px; background: rgba(15,20,25,.75);
-            border: none; color: white; border-radius: 50%; width: 32px; height: 32px;
-            font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        .image-preview {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .image-preview-remove {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.75);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.2s;
+        }
+        .image-preview-remove:hover {
+            background: rgba(0,0,0,0.9);
         }
 
-        /* ─── POST / TWEET ─── */
+        /* ─── POSTS ─── */
         .post {
             display: flex; gap: 12px; padding: 12px 16px;
             border-bottom: 1px solid var(--border); cursor: pointer;
@@ -205,406 +296,346 @@
             color: white; flex-shrink: 0; overflow: hidden;
         }
         .post-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .post-body { flex: 1; min-width: 0; }
-        .post-header { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-        .post-name { font-weight: 700; font-size: 15px; }
+        .post-content { flex: 1; min-width: 0; }
+        .post-header {
+            display: flex; align-items: baseline; gap: 4px;
+            margin-bottom: 2px; flex-wrap: wrap;
+        }
+        .post-author { font-weight: 700; font-size: 15px; }
         .post-handle { color: var(--text-muted); font-size: 15px; }
-        .post-dot { color: var(--text-muted); }
-        .post-time { color: var(--text-muted); font-size: 15px; }
-        .post-text { margin-top: 4px; line-height: 1.5; font-size: 15px; white-space: pre-wrap; word-break: break-word; }
+        .post-timestamp { color: var(--text-muted); font-size: 15px; }
+        .post-text {
+            font-size: 15px; line-height: 1.5; margin: 4px 0 8px;
+            word-wrap: break-word; white-space: pre-wrap;
+        }
         .post-image {
-            margin-top: 12px; border-radius: 16px; overflow: hidden;
-            border: 1px solid var(--border); max-height: 500px;
+            width: 100%; border-radius: 16px; margin: 8px 0;
+            border: 1px solid var(--border); max-height: 600px;
+            object-fit: cover; cursor: pointer;
         }
-        .post-image img { width: 100%; max-height: 500px; object-fit: cover; display: block; }
-
-        /* ─── POST ACTIONS ─── */
-        .post-actions { display: flex; gap: 0; margin-top: 12px; }
+        .post-actions {
+            display: flex; align-items: center; gap: 4px;
+            margin-top: 8px; max-width: 425px; justify-content: space-between;
+        }
         .post-action {
-            display: flex; align-items: center; gap: 6px; padding: 6px 10px;
-            border-radius: 9999px; cursor: pointer; font-size: 13px;
-            color: var(--text-muted); background: none; border: none;
-            font-family: var(--font); transition: color .15s, background .15s;
-            flex: 1; max-width: 100px;
+            display: flex; align-items: center; gap: 8px; padding: 8px;
+            border-radius: 9999px; cursor: pointer; transition: background .15s, color .15s;
+            font-size: 13px; color: var(--text-muted); border: none; background: none;
+            font-family: var(--font);
         }
-        .post-action:hover.like { color: var(--accent-like); background: var(--accent-like-bg); }
-        .post-action:hover.comment { color: var(--accent); background: rgba(29,155,240,.1); }
-        .post-action:hover.share { color: var(--accent-retweet); background: rgba(0,186,124,.1); }
-        .post-action.liked { color: var(--accent-like); }
-        .post-action.liked svg { fill: var(--accent-like); }
         .post-action-icon { font-size: 18px; }
-        .post-count { font-size: 13px; }
+        .post-action-count { font-size: 13px; min-width: 16px; text-align: left; }
+        .post-action.comment:hover { color: var(--accent); background: rgba(29,155,240,.1); }
+        .post-action.like:hover { color: var(--accent-like); background: var(--accent-like-bg); }
+        .post-action.like.liked { color: var(--accent-like); }
+        .post-action.like.liked .post-action-icon { animation: likeAnim .3s; }
+        @keyframes likeAnim { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+        .post-action.share:hover { color: var(--accent-retweet); background: rgba(0,186,124,.1); }
 
-        /* ─── COMMENTS ─── */
-        .comment-section {
-            padding: 0 16px 8px; border-bottom: 1px solid var(--border);
+        /* ─── WIDGETS ─── */
+        .widget {
+            background: var(--bg-card); border-radius: 16px;
+            border: 1px solid var(--border); overflow: hidden; margin-bottom: 16px;
         }
-        .comment {
-            display: flex; gap: 10px; padding: 10px 0;
+        .widget-header {
+            padding: 12px 16px; font-size: 20px; font-weight: 700;
             border-bottom: 1px solid var(--border);
         }
-        .comment:last-child { border-bottom: none; }
-        .comment-avatar {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: var(--accent); display: flex; align-items: center;
-            justify-content: center; font-size: 13px; font-weight: 700;
-            color: white; flex-shrink: 0; overflow: hidden;
-        }
-        .comment-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .comment-body { flex: 1; }
-        .comment-header { font-size: 13px; color: var(--text-muted); margin-bottom: 2px; }
-        .comment-header strong { color: var(--text); font-size: 14px; }
-        .comment-text { font-size: 14px; line-height: 1.4; }
-        .comment-input-row {
-            display: flex; gap: 10px; align-items: flex-start; padding: 10px 0;
-        }
-        .comment-input {
-            flex: 1; background: transparent; border: none; outline: none;
+        .widget-content { padding: 12px 16px; }
+        .search-input {
+            width: 100%; padding: 12px 16px; border: none;
+            border-radius: 9999px; background: var(--bg-secondary);
             color: var(--text); font-size: 15px; font-family: var(--font);
-            resize: none; line-height: 1.4; border-bottom: 1px solid var(--border);
-            padding-bottom: 6px;
+            outline: none; transition: background .2s;
         }
-        .comment-input::placeholder { color: var(--text-muted); }
-        .comment-send {
-            background: var(--accent); color: white; border: none;
-            border-radius: 9999px; padding: 6px 16px; font-size: 14px;
-            font-weight: 700; cursor: pointer; font-family: var(--font);
+        .search-input:focus { background: var(--bg-hover); outline: 2px solid var(--accent); }
+        .trend-item {
+            padding: 12px 0; cursor: pointer; transition: background .15s;
         }
-        .comment-send:disabled { opacity: .5; cursor: default; }
-
-        /* ─── WIDGETS PANEL ─── */
-        .widget-search {
-            position: sticky; top: 0; padding: 12px 0 8px;
-            background: var(--bg); z-index: 5;
-        }
-        .search-bar {
-            display: flex; align-items: center; gap: 12px;
-            background: var(--bg-secondary); border: 1px solid transparent;
-            border-radius: 9999px; padding: 10px 16px;
-            transition: border-color .2s;
-        }
-        .search-bar:focus-within { border-color: var(--accent); background: var(--bg); }
-        .search-bar input {
-            flex: 1; background: none; border: none; outline: none;
-            color: var(--text); font-size: 15px; font-family: var(--font);
-        }
-        .search-bar input::placeholder { color: var(--text-muted); }
-        .widget-card {
-            background: var(--bg-secondary); border-radius: 16px;
-            padding: 16px; margin-bottom: 16px;
-        }
-        .widget-title { font-size: 20px; font-weight: 800; margin-bottom: 12px; }
-        .villochat-btn {
-            display: flex; align-items: center; gap: 10px;
-            background: #075e54; color: white; border: none;
-            border-radius: 9999px; padding: 12px 20px; font-size: 15px;
-            font-weight: 700; cursor: pointer; font-family: var(--font);
-            width: 100%; transition: background .2s;
-        }
-        .villochat-btn:hover { background: #064f47; }
-
-        /* ─── LOADING / STATES ─── */
-        .loading-spinner {
-            display: flex; align-items: center; justify-content: center;
-            padding: 40px; color: var(--text-muted); gap: 10px;
-        }
-        .spinner {
-            width: 24px; height: 24px; border: 3px solid var(--border);
-            border-top-color: var(--accent); border-radius: 50%;
-            animation: spin .8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); font-size: 15px; }
-        .empty-state h3 { font-size: 24px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
-
-        /* ─── NOTIFICATION TOAST ─── */
-        #toast {
-            position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: var(--accent); color: white; padding: 12px 24px;
-            border-radius: 9999px; font-size: 14px; font-weight: 600;
-            z-index: 9999; transition: transform .3s cubic-bezier(.34,1.56,.64,1);
-            pointer-events: none;
-        }
-        #toast.show { transform: translateX(-50%) translateY(0); }
-        #toast.error { background: #f4212e; }
-
-        /* ─── MODAL ─── */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,.6);
-            z-index: 1000; display: flex; align-items: flex-start;
-            justify-content: center; padding-top: 64px; overflow-y: auto;
-        }
-        .modal-box {
-            background: var(--bg); border-radius: 16px; width: 100%;
-            max-width: 600px; position: relative;
-        }
-        .modal-header {
-            display: flex; align-items: center; gap: 16px;
-            padding: 12px 16px; border-bottom: 1px solid var(--border);
-        }
-        .modal-close {
-            background: none; border: none; color: var(--text); font-size: 20px;
-            cursor: pointer; border-radius: 50%; padding: 6px; line-height: 1;
-        }
-        .modal-close:hover { background: var(--bg-hover); }
-        .modal-title { font-size: 20px; font-weight: 700; }
-
-        /* ─── PROFILE PAGE ─── */
-        .profile-banner {
-            height: 160px; background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
-        }
-        .profile-info { padding: 16px; }
-        .profile-avatar-wrap {
-            width: 80px; height: 80px; border-radius: 50%;
-            border: 4px solid var(--bg); overflow: hidden;
-            background: var(--accent); display: flex; align-items: center;
-            justify-content: center; font-size: 28px; font-weight: 700;
-            color: white; margin-top: -40px; margin-bottom: 12px;
-        }
-        .profile-avatar-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-name { font-size: 20px; font-weight: 800; }
-        .profile-handle { color: var(--text-muted); font-size: 15px; margin-bottom: 12px; }
-        .profile-stats { display: flex; gap: 20px; font-size: 14px; margin-top: 12px; }
-        .profile-stat span { color: var(--text-muted); }
-        .profile-stat strong { color: var(--text); }
-
-        /* ─── MOBILE / BOTTOM NAV ─── */
-        #mobile-nav {
-            display: none; position: fixed; bottom: 0; left: 0; right: 0;
-            background: var(--bg); border-top: 1px solid var(--border);
-            padding: 8px 0; z-index: 100;
-        }
-        .mobile-nav-inner { display: flex; }
-        .mobile-nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center;
-            padding: 8px; cursor: pointer; color: var(--text-muted);
-            font-size: 24px; border: none; background: none;
-        }
-        .mobile-nav-item.active { color: var(--text); }
-
-        @media (max-width: 1100px) { #widgets { display: none; } }
-        @media (max-width: 700px) {
-            #sidebar { display: none; }
-            #mobile-nav { display: flex; }
-            #main { padding-bottom: 60px; border-right: none; }
-            .compose-textarea { font-size: 16px; }
-            .nav-label { display: none; }
-        }
-        @media (min-width: 700px) and (max-width: 900px) {
-            #sidebar { width: 72px; }
-            .nav-label { display: none; }
-            .sidebar-user-info { display: none; }
-            .nav-post-btn span { display: none; }
-        }
-
-        /* ─── SHARE TO VILLOCHAT ─── */
-        .share-villochat-btn {
-            display: flex; align-items: center; gap: 6px; padding: 6px 10px;
-            border-radius: 9999px; cursor: pointer; font-size: 13px;
-            color: #075e54; background: none; border: none;
-            font-family: var(--font); transition: color .15s, background .15s;
-        }
-        .share-villochat-btn:hover { background: rgba(7,94,84,.1); }
-
-        /* ─── TRENDING ─── */
-        .trend-item { padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
-        .trend-item:last-child { border-bottom: none; }
-        .trend-item:hover { background: none; }
-        .trend-category { font-size: 13px; color: var(--text-muted); }
-        .trend-name { font-size: 15px; font-weight: 700; }
+        .trend-item:hover { background: var(--bg-hover); }
+        .trend-category { font-size: 13px; color: var(--text-muted); margin-bottom: 2px; }
+        .trend-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
         .trend-count { font-size: 13px; color: var(--text-muted); }
 
-        input::-webkit-input-placeholder { color: var(--text-muted) !important; }
-        textarea::-webkit-input-placeholder { color: var(--text-muted) !important; }
-    </style>
+        /* ─── MODALS ─── */
+        .modal {
+            display: none; position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.5); align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: var(--bg); border-radius: 16px; max-width: 600px;
+            width: 90%; max-height: 90vh; overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+        .modal-header {
+            display: flex; align-items: center; padding: 12px 16px;
+            border-bottom: 1px solid var(--border); position: sticky; top: 0;
+            background: var(--bg); z-index: 1;
+        }
+        .modal-close {
+            background: none; border: none; font-size: 22px; cursor: pointer;
+            color: var(--text); padding: 8px; border-radius: 50%;
+            transition: background .15s; display: flex; align-items: center;
+        }
+        .modal-close:hover { background: var(--bg-hover); }
+        .modal-title { font-size: 20px; font-weight: 700; margin-left: 24px; }
+        .modal-body { padding: 16px; }
+        .comment-item {
+            display: flex; gap: 12px; padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .comment-item:last-child { border-bottom: none; }
 
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+        /* ─── MOBILE NAV ─── */
+        .mobile-nav {
+            display: none; position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--bg); border-top: 1px solid var(--border);
+            z-index: 100; height: 60px;
+        }
+        .mobile-nav-inner {
+            display: flex; align-items: center; justify-content: space-around;
+            height: 100%; max-width: 600px; margin: 0 auto;
+        }
+        .mobile-nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; padding: 8px 16px; cursor: pointer; color: var(--text-muted);
+            transition: color .15s; text-decoration: none; font-size: 24px;
+        }
+        .mobile-nav-item.active { color: var(--text); }
+        .mobile-compose-btn {
+            position: fixed; bottom: 76px; right: 16px; z-index: 101;
+            width: 56px; height: 56px; border-radius: 50%;
+            background: var(--accent); color: white; border: none;
+            font-size: 24px; cursor: pointer; display: none;
+            align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(29,155,240,0.3);
+            transition: background .2s;
+        }
+        .mobile-compose-btn:hover { background: var(--accent-hover); }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            padding: 48px 24px; text-align: center; color: var(--text-muted);
+        }
+        .empty-state h3 { font-size: 24px; margin-bottom: 8px; color: var(--text); }
+        .empty-state p { font-size: 15px; }
+
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            background: var(--accent); color: white; padding: 12px 24px;
+            border-radius: 9999px; font-size: 15px; font-weight: 500;
+            z-index: 2000; opacity: 0; transition: opacity .3s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 1024px) {
+            #widgets { display: none; }
+            #sidebar { width: 88px; padding: 0 4px; }
+            .nav-label { display: none; }
+            .nav-item { justify-content: center; padding: 12px; }
+            .nav-post-btn { padding: 12px; margin: 16px 4px; }
+            .sidebar-user-info { display: none; }
+        }
+        @media (max-width: 688px) {
+            #sidebar { display: none; }
+            #main { border-right: none; }
+            .mobile-nav { display: block; }
+            .mobile-compose-btn { display: flex; }
+            body { padding-bottom: 60px; }
+        }
+
+        /* ─── LOADING ─── */
+        .loading {
+            display: flex; align-items: center; justify-content: center;
+            padding: 32px; color: var(--text-muted);
+        }
+        .spinner {
+            width: 32px; height: 32px; border: 3px solid var(--border);
+            border-top-color: var(--accent); border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
 
-<!-- ─── LOGIN SCREEN ─── -->
+<!-- LOGIN SCREEN -->
 <div id="login-screen">
     <div class="login-box">
-        <div class="login-logo"><svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#1d9bf0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 0 1 6 6c0 .6-.1 1.2-.2 1.8C19.3 10.6 21 12.2 21 14c0 2-1.8 3.5-4 3.5-.3 0-.6 0-.9-.1l-.3 1.9c-.2 1.4-1.4 2.4-2.8 2.7V22h-2v-.1C9.6 21.6 8.4 20.6 8.2 19.3l-.3-1.9c-.3.1-.6.1-.9.1C4.8 17.5 3 16 3 14c0-1.8 1.7-3.4 3.2-4.2C6.1 9.2 6 8.6 6 8a6 6 0 0 1 6-6z"/><path d="M9 15c0 1.7.7 3.2 1.8 4.3"/><path d="M15 15c0 1.7-.7 3.2-1.8 4.3"/></svg></div>
+        <div class="login-logo">🐙</div>
         <div class="login-title">Willkommen bei Octoverse</div>
-        <div class="login-sub">Melde dich mit deinem VilloChat-Konto an</div>
-        <input class="login-input" id="login-user" type="text" placeholder="VilloChat-Nutzername" autocomplete="username">
-        <input class="login-input" id="login-pin" type="password" placeholder="PIN (xxxx-xxxx)" maxlength="9" autocomplete="current-password">
-        <div id="login-hint" style="font-size:13px; color:var(--text-muted); margin-bottom:8px; display:none;"></div>
-        <button class="login-btn" id="login-btn" onclick="doLogin()">Anmelden</button>
-        <div class="login-note">Noch kein Konto? Registriere dich zuerst in <strong>VilloChat</strong>.</div>
+        <div class="login-sub">Verbinde dich mit VilloChat-Nutzern</div>
+        <div id="login-error" class="login-error" style="display:none;"></div>
+        <input type="text" id="login-username" class="login-input" placeholder="Benutzername" autocomplete="username">
+        <input type="password" id="login-password" class="login-input" placeholder="Passwort" autocomplete="current-password">
+        <button class="login-btn" onclick="doLogin()">Anmelden</button>
+        <div class="login-divider">oder</div>
+        <button class="login-btn outline" onclick="toggleRegister()">Neu registrieren</button>
+        <div class="login-note">Nutze deinen VilloChat-Account oder erstelle einen neuen</div>
     </div>
 </div>
 
-<!-- ─── MAIN APP ─── -->
+<!-- MAIN APP -->
 <div id="app" style="display:none;">
-
     <!-- SIDEBAR -->
-    <nav id="sidebar">
-        <div class="sidebar-logo"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1d9bf0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a6 6 0 0 1 6 6c0 .6-.1 1.2-.2 1.8C19.3 10.6 21 12.2 21 14c0 2-1.8 3.5-4 3.5-.3 0-.6 0-.9-.1l-.3 1.9c-.2 1.4-1.4 2.4-2.8 2.7V22h-2v-.1C9.6 21.6 8.4 20.6 8.2 19.3l-.3-1.9c-.3.1-.6.1-.9.1C4.8 17.5 3 16 3 14c0-1.8 1.7-3.4 3.2-4.2C6.1 9.2 6 8.6 6 8a6 6 0 0 1 6-6z"/><path d="M9 15c0 1.7.7 3.2 1.8 4.3"/><path d="M15 15c0 1.7-.7 3.2-1.8 4.3"/></svg></div>
-        <a class="nav-item active" id="nav-home" onclick="showFeed()">
-            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-            <span class="nav-label">Start</span>
-        </a>
-        <a class="nav-item" id="nav-explore" onclick="showExplore()">
-            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
-            <span class="nav-label">Erkunden</span>
-        </a>
-        <a class="nav-item" id="nav-profile" onclick="showProfile()">
-            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+    <div id="sidebar">
+        <div class="sidebar-logo">🐙</div>
+        <div id="nav-home" class="nav-item active" onclick="showFeed(); setMobileNav('home');">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Home</span>
+        </div>
+        <div id="nav-explore" class="nav-item" onclick="showExplore(); setMobileNav('explore');">
+            <span class="nav-icon">🔍</span>
+            <span class="nav-label">Explore</span>
+        </div>
+        <div id="nav-profile" class="nav-item" onclick="showProfile(); setMobileNav('profile');">
+            <span class="nav-icon">👤</span>
             <span class="nav-label">Profil</span>
-        </a>
-        <a class="nav-item" onclick="openVilloChat()">
-            <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
+        </div>
+        <div class="nav-item" onclick="openVilloChat()">
+            <span class="nav-icon">💬</span>
             <span class="nav-label">VilloChat</span>
-        </a>
+        </div>
         <button class="nav-post-btn" onclick="openComposeModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg><span>Posten</span>
+            <span>📝</span>
+            <span>Posten</span>
         </button>
-        <div class="sidebar-user" onclick="showProfile()">
-            <div class="sidebar-avatar" id="sidebar-av"></div>
-            <div class="sidebar-user-info">
-                <div class="sidebar-user-name" id="sidebar-name"></div>
-                <div class="sidebar-user-handle" id="sidebar-handle"></div>
+        
+        <div class="theme-toggle" onclick="toggleTheme()">
+            <span class="theme-toggle-label">Dark Mode</span>
+            <div class="theme-toggle-switch" id="theme-switch">
+                <div class="theme-toggle-slider"></div>
             </div>
         </div>
-    </nav>
+        
+        <div class="sidebar-user">
+            <div class="sidebar-avatar" id="sidebar-avatar"></div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebar-username">User</div>
+                <div class="sidebar-user-handle" id="sidebar-handle">@user</div>
+            </div>
+        </div>
+    </div>
 
-    <!-- MAIN FEED -->
-    <main id="main">
-        <!-- HOME FEED -->
-        <section id="page-home">
+    <!-- MAIN CONTENT -->
+    <div id="main">
+        <!-- HOME PAGE -->
+        <div id="page-home">
             <div class="feed-header">
                 <div class="feed-header-inner">
-                    <span class="feed-title">Start</span>
+                    <div class="feed-title">Home</div>
                 </div>
                 <div class="tab-bar">
-                    <div class="tab active" id="tab-foryou" onclick="switchTab('foryou')">Für dich</div>
-                    <div class="tab" id="tab-following" onclick="switchTab('following')">Folge ich</div>
+                    <div id="tab-foryou" class="tab active" onclick="switchTab('foryou')">Für dich</div>
+                    <div id="tab-following" class="tab" onclick="switchTab('following')">Following</div>
                 </div>
             </div>
-            <!-- Compose -->
-            <div class="compose-box" id="compose-inline">
-                <div class="sidebar-avatar" id="compose-av" style="margin-top:4px;"></div>
+            <div class="compose-box">
+                <div class="sidebar-avatar" id="compose-avatar"></div>
                 <div class="compose-area">
-                    <textarea class="compose-textarea" id="compose-text" placeholder="Was gibt's Neues?" rows="2" oninput="onComposeInput(this)"></textarea>
-                    <div id="compose-img-preview" style="display:none;">
-                        <div class="compose-image-preview">
-                            <img id="compose-preview-img" src="" alt="">
-                            <button class="compose-image-remove" onclick="removeComposeImage()"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
-                        </div>
+                    <textarea class="compose-textarea" id="compose-text" placeholder="Was gibt's Neues?" maxlength="280"></textarea>
+                    <div id="compose-image-preview" style="display:none;" class="image-preview-container">
+                        <img id="compose-image-display" class="image-preview" alt="Preview">
+                        <button class="image-preview-remove" onclick="removeComposeImage()">×</button>
                     </div>
                     <div class="compose-toolbar">
                         <div class="compose-actions">
-                            <button class="compose-action" title="Bild hinzufügen" onclick="document.getElementById('post-img-input').click()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></button>
-                            <input type="file" id="post-img-input" accept="image/*" style="display:none;" onchange="handleComposeImage(this)">
+                            <button class="compose-action" id="image-upload-btn" title="Bild hochladen">
+                                <span>🖼️</span>
+                            </button>
+                            <input type="file" id="image-upload-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
                         </div>
-                        <span class="compose-char" id="compose-char">500</span>
-                        <button class="compose-submit" id="compose-btn" onclick="submitPost()" disabled>Posten</button>
+                        <span class="compose-char-counter" id="char-counter">280</span>
+                        <button class="compose-submit" id="compose-btn" onclick="submitPost()">Posten</button>
                     </div>
                 </div>
             </div>
-            <div id="feed-container">
-                <div class="loading-spinner"><div class="spinner"></div> Wird geladen…</div>
-            </div>
-        </section>
+            <div id="feed-container"></div>
+        </div>
 
         <!-- EXPLORE PAGE -->
-        <section id="page-explore" style="display:none;">
+        <div id="page-explore" style="display:none;">
             <div class="feed-header">
                 <div class="feed-header-inner">
-                    <span class="feed-title">Erkunden</span>
+                    <div class="feed-title">Explore</div>
                 </div>
             </div>
-            <div style="padding:16px;">
-                <div class="search-bar">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    <input type="text" placeholder="Suche auf Octoverse" id="explore-search" oninput="doExploreSearch(this.value)">
-                </div>
+            <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+                <input type="text" class="search-input" placeholder="Suche Posts..." oninput="doExploreSearch(this.value)">
             </div>
-            <div id="explore-container">
-                <div id="explore-posts"></div>
-            </div>
-        </section>
+            <div id="explore-posts"></div>
+        </div>
 
         <!-- PROFILE PAGE -->
-        <section id="page-profile" style="display:none;">
+        <div id="page-profile" style="display:none;">
             <div class="feed-header">
                 <div class="feed-header-inner">
-                    <button style="background:none;border:none;color:var(--text);font-size:20px;cursor:pointer;margin-right:8px;" onclick="showFeed()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-                    <span class="feed-title" id="profile-page-title">Profil</span>
+                    <button class="modal-close" onclick="showFeed()">←</button>
+                    <div class="feed-title" id="profile-page-title">Profil</div>
                 </div>
             </div>
-            <div class="profile-banner"></div>
-            <div class="profile-info">
-                <div class="profile-avatar-wrap" id="profile-av"></div>
-                <div class="profile-name" id="profile-name-display"></div>
-                <div class="profile-handle" id="profile-handle-display"></div>
-                <div class="profile-stats">
-                    <div class="profile-stat"><strong id="profile-post-count">0</strong> <span>Posts</span></div>
+            <div style="padding: 16px; border-bottom: 1px solid var(--border);">
+                <div class="sidebar-avatar" id="profile-av" style="width: 80px; height: 80px; font-size: 28px; margin-bottom: 12px;"></div>
+                <div style="font-size: 20px; font-weight: 700; margin-bottom: 2px;" id="profile-name-display">User</div>
+                <div style="color: var(--text-muted); margin-bottom: 12px;" id="profile-handle-display">@user</div>
+                <div style="display: flex; gap: 16px; font-size: 14px;">
+                    <div><span style="font-weight: 700;" id="profile-post-count">0</span> <span style="color: var(--text-muted);">Posts</span></div>
                 </div>
-            </div>
-            <div class="tab-bar" style="border-top:1px solid var(--border);">
-                <div class="tab active">Posts</div>
             </div>
             <div id="profile-posts-container"></div>
-        </section>
-    </main>
+        </div>
+    </div>
 
-    <!-- WIDGETS -->
-    <aside id="widgets">
-        <div class="widget-search">
-            <div class="search-bar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" placeholder="Suche auf Octoverse" oninput="doExploreSearch(this.value)">
+    <!-- WIDGETS SIDEBAR -->
+    <div id="widgets">
+        <div class="widget" style="margin-top: 12px;">
+            <div class="widget-header">Trending</div>
+            <div class="widget-content" id="trending-list">
+                <div class="loading"><div class="spinner"></div></div>
             </div>
         </div>
-        <div class="widget-card">
-            <div class="widget-title">VilloChat öffnen</div>
-            <button class="villochat-btn" onclick="openVilloChat()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> VilloChat öffnen</button>
-        </div>
-        <div class="widget-card" id="trending-widget">
-            <div class="widget-title">Trends</div>
-            <div id="trending-list"></div>
-        </div>
-    </aside>
-</div>
-
-<!-- MOBILE BOTTOM NAV -->
-<div id="mobile-nav">
-    <div class="mobile-nav-inner">
-        <button class="mobile-nav-item active" id="mnav-home" onclick="showFeed(); setMobileNav('home')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
-        <button class="mobile-nav-item" id="mnav-explore" onclick="showExplore(); setMobileNav('explore')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
-        <button class="mobile-nav-item" onclick="openComposeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>
-        <button class="mobile-nav-item" id="mnav-profile" onclick="showProfile(); setMobileNav('profile')"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
-        <button class="mobile-nav-item" onclick="openVilloChat()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></button>
     </div>
 </div>
 
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-nav">
+    <div class="mobile-nav-inner">
+        <a id="mnav-home" class="mobile-nav-item active" onclick="showFeed(); setMobileNav('home');">🏠</a>
+        <a id="mnav-explore" class="mobile-nav-item" onclick="showExplore(); setMobileNav('explore');">🔍</a>
+        <a id="mnav-profile" class="mobile-nav-item" onclick="showProfile(); setMobileNav('profile');">👤</a>
+    </div>
+</div>
+<button class="mobile-compose-btn" onclick="openComposeModal()">📝</button>
+
 <!-- COMPOSE MODAL -->
-<div class="modal-overlay" id="compose-modal" style="display:none;" onclick="if(event.target===this)closeComposeModal()">
-    <div class="modal-box">
+<div id="compose-modal" class="modal">
+    <div class="modal-content">
         <div class="modal-header">
-            <button class="modal-close" onclick="closeComposeModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
-            <span class="modal-title">Neuer Post</span>
+            <button class="modal-close" onclick="closeComposeModal()">×</button>
+            <div class="modal-title">Neuer Post</div>
         </div>
-        <div class="compose-box">
-            <div class="sidebar-avatar" id="modal-compose-av"></div>
-            <div class="compose-area">
-                <textarea class="compose-textarea" id="modal-compose-text" placeholder="Was gibt's Neues?" rows="4" oninput="onModalComposeInput(this)"></textarea>
-                <div id="modal-compose-img-preview" style="display:none;">
-                    <div class="compose-image-preview">
-                        <img id="modal-compose-preview-img" src="" alt="">
-                        <button class="compose-image-remove" onclick="removeModalComposeImage()"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+        <div class="modal-body">
+            <div style="display: flex; gap: 12px;">
+                <div class="sidebar-avatar" id="modal-compose-avatar"></div>
+                <div style="flex: 1;">
+                    <textarea class="compose-textarea" id="modal-compose-text" placeholder="Was gibt's Neues?" maxlength="280"></textarea>
+                    <div id="modal-compose-image-preview" style="display:none;" class="image-preview-container">
+                        <img id="modal-compose-image-display" class="image-preview" alt="Preview">
+                        <button class="image-preview-remove" onclick="removeModalComposeImage()">×</button>
                     </div>
-                </div>
-                <div class="compose-toolbar">
-                    <div class="compose-actions">
-                        <button class="compose-action" onclick="document.getElementById('modal-post-img-input').click()"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg></button>
-                        <input type="file" id="modal-post-img-input" accept="image/*" style="display:none;" onchange="handleModalComposeImage(this)">
+                    <div class="compose-toolbar">
+                        <div class="compose-actions">
+                            <button class="compose-action" id="modal-image-upload-btn" title="Bild hochladen">
+                                <span>🖼️</span>
+                            </button>
+                            <input type="file" id="modal-image-upload-input" accept="image/*" style="display:none;" onchange="handleModalImageUpload(event)">
+                        </div>
+                        <span class="compose-char-counter" id="modal-char-counter">280</span>
+                        <button class="compose-submit" id="modal-compose-btn" onclick="submitModalPost()">Posten</button>
                     </div>
-                    <span class="compose-char" id="modal-compose-char">500</span>
-                    <button class="compose-submit" id="modal-compose-btn" onclick="submitModalPost()" disabled>Posten</button>
                 </div>
             </div>
         </div>
@@ -612,572 +643,615 @@
 </div>
 
 <!-- COMMENTS MODAL -->
-<div class="modal-overlay" id="comments-modal" style="display:none;" onclick="if(event.target===this)closeCommentsModal()">
-    <div class="modal-box">
+<div id="comments-modal" class="modal">
+    <div class="modal-content">
         <div class="modal-header">
-            <button class="modal-close" onclick="closeCommentsModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
-            <span class="modal-title">Post</span>
+            <button class="modal-close" onclick="closeCommentsModal()">×</button>
+            <div class="modal-title">Kommentare</div>
         </div>
-        <div id="comments-post-content"></div>
-        <div class="comment-section">
-            <div class="comment-input-row">
-                <div class="comment-avatar" id="comments-my-av"></div>
-                <textarea class="comment-input" id="comment-input" placeholder="Antworte auf diesen Post…" rows="1" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-                <button class="comment-send" id="comment-send-btn" onclick="submitComment()" disabled>Antworten</button>
+        <div class="modal-body">
+            <div id="comments-original-post"></div>
+            <div style="display: flex; gap: 12px; padding: 16px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 16px;">
+                <div class="sidebar-avatar" id="comment-avatar"></div>
+                <div style="flex: 1;">
+                    <textarea class="compose-textarea" id="comment-text" placeholder="Schreibe einen Kommentar..." style="min-height: 80px;" maxlength="280"></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                        <span class="compose-char-counter" id="comment-char-counter">280</span>
+                        <button class="compose-submit" onclick="submitComment()">Kommentieren</button>
+                    </div>
+                </div>
             </div>
             <div id="comments-list"></div>
         </div>
     </div>
 </div>
 
-<!-- SHARE TO VILLOCHAT MODAL -->
-<div class="modal-overlay" id="share-modal" style="display:none;" onclick="if(event.target===this)closeShareModal()">
-    <div class="modal-box" style="max-width:420px;">
+<!-- SHARE MODAL -->
+<div id="share-modal" class="modal">
+    <div class="modal-content">
         <div class="modal-header">
-            <button class="modal-close" onclick="closeShareModal()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
-            <span class="modal-title">Via VilloChat teilen</span>
+            <button class="modal-close" onclick="closeShareModal()">×</button>
+            <div class="modal-title">An VilloChat senden</div>
         </div>
-        <div style="padding:16px;">
-            <p style="color:var(--text-muted);font-size:14px;margin-bottom:12px;">Wähle einen VilloChat-Kontakt:</p>
+        <div class="modal-body">
             <div id="share-contacts-list"></div>
         </div>
     </div>
 </div>
 
-<div id="toast"></div>
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import {
-    getDatabase, ref, set, get, push, update,
-    onChildAdded, onValue, off, remove, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import { getDatabase, ref, set, get, push, onValue, update, remove } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 
+// ─── FIREBASE CONFIG ───
 const firebaseConfig = {
-    apiKey: "AIzaSyB3wZU09SzNh7xZFPFjPHR9nhDCWkGzj7E",
-    authDomain: "villochat.firebaseapp.com",
-    databaseURL: "https://villochat-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "villochat",
-    storageBucket: "villochat.firebasedata.app",
-    messagingSenderId: "257561919332",
-    appId: "1:257561919332:web:712d942c2f2e07169e8471"
+    apiKey: "AIzaSyCOGW0OZaCnuN-xxxxxxxxxxxxxxx",
+    authDomain: "your-project.firebaseapp.com",
+    databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+    projectId: "your-project",
+    storageBucket: "your-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:xxxxxxxxxxxxx"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getDatabase(app);
+window.db = db;
+window.dbRef = ref;
+window.dbSet = set;
+window.dbGet = get;
+window.dbPush = push;
+window.dbUpdate = update;
+window.dbRemove = remove;
+window.dbOnValue = onValue;
 
-// ─── STATE ───
-let myUsername = "";
-let myAvatarData = null; // base64
+// ─── GLOBAL STATE ───
+let myUsername = localStorage.getItem("octoverse_username") || "";
 let currentTab = "foryou";
-let composeImageData = null;
-let modalComposeImageData = null;
-let currentPostId = null; // for comments modal
 let currentSharePost = null;
-let feedListener = null;
-const MAX_BYTES = 1024 * 1024; // 1 MB
-const MAX_CHARS = 500;
+let currentCommentPost = null;
+let currentComposeImage = null;
+let currentModalComposeImage = null;
 
-// ─── HELPERS ───
-function toast(msg, type = "") {
-    const t = document.getElementById("toast");
-    t.textContent = msg;
-    t.className = "show" + (type ? " " + type : "");
-    setTimeout(() => { t.className = ""; }, 3000);
+// ─── THEME ───
+const savedTheme = localStorage.getItem("octoverse_theme") || "dark";
+if (savedTheme === "light") {
+    document.body.classList.add("light");
+    document.getElementById("theme-switch").classList.add("active");
 }
 
-function timeAgo(ts) {
-    const diff = Date.now() - ts;
-    if (diff < 60000) return "jetzt";
-    if (diff < 3600000) return Math.floor(diff / 60000) + " Min.";
-    if (diff < 86400000) return Math.floor(diff / 3600000) + " Std.";
-    return Math.floor(diff / 86400000) + " T.";
-}
-
-function escHtml(s) {
-    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-function stringToColor(s) {
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) hash = s.charCodeAt(i) + ((hash << 5) - hash);
-    return `hsl(${Math.abs(hash) % 360}, 55%, 45%)`;
-}
-
-async function compressImage(file, maxBytes) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        img.onload = () => {
-            URL.revokeObjectURL(url);
-            const canvas = document.createElement("canvas");
-            let { width, height } = img;
-            const maxDim = 1200;
-            if (width > maxDim || height > maxDim) {
-                const scale = Math.min(maxDim / width, maxDim / height);
-                width = Math.round(width * scale);
-                height = Math.round(height * scale);
-            }
-            const tryCompress = (w, h) => {
-                canvas.width = w; canvas.height = h;
-                canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-                let quality = 0.85, result;
-                do {
-                    result = canvas.toDataURL("image/jpeg", quality);
-                    quality -= 0.1;
-                } while (result.length > maxBytes * 1.37 && quality > 0.1);
-                if (result.length > maxBytes * 1.37 && w > 200) return tryCompress(Math.round(w * 0.7), Math.round(h * 0.7));
-                return result;
-            };
-            resolve(tryCompress(width, height));
-        };
-        img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
-        img.src = url;
-    });
-}
-
-// ─── AVATAR HTML ───
-function avatarHTML(username, imageData, size = 40, fontSize = 16) {
-    if (imageData && imageData.startsWith("data:")) {
-        return `<img src="${imageData}" style="width:100%;height:100%;object-fit:cover;" alt="">`;
-    }
-    const color = stringToColor(username);
-    const letter = (username[0] || "?").toUpperCase();
-    return `<span style="background:${color};width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:700;color:white;">${letter}</span>`;
-}
-
-// ─── AVATAR CACHE ───
-const avatarCache = {};
-async function getAvatar(username) {
-    if (avatarCache[username] !== undefined) return avatarCache[username];
-    try {
-        const snap = await get(ref(db, `accounts/${username}/avatar`));
-        const data = snap.exists() ? snap.val() : null;
-        avatarCache[username] = data;
-        return data;
-    } catch { avatarCache[username] = null; return null; }
-}
-
-// ─── AUTH ───
-window.doLogin = async function() {
-    const u = document.getElementById("login-user").value.trim();
-    const p = document.getElementById("login-pin").value;
-    if (!u || p.length < 9) { toast("Bitte alle Felder ausfüllen.", "error"); return; }
-    const btn = document.getElementById("login-btn");
-    btn.textContent = "…"; btn.disabled = true;
-    try {
-        const snap = await get(ref(db, "accounts/" + u));
-        if (!snap.exists() || snap.val().pin !== p) {
-            toast("Falscher Nutzername oder PIN.", "error");
-            btn.textContent = "Anmelden"; btn.disabled = false;
-            return;
-        }
-        await signInAnonymously(auth);
-        myUsername = u;
-        localStorage.setItem("ov_session", u);
-        await initApp();
-    } catch (e) {
-        toast("Fehler: " + e.message, "error");
-        btn.textContent = "Anmelden"; btn.disabled = false;
-    }
+window.toggleTheme = function() {
+    document.body.classList.toggle("light");
+    const isLight = document.body.classList.contains("light");
+    document.getElementById("theme-switch").classList.toggle("active", isLight);
+    localStorage.setItem("octoverse_theme", isLight ? "light" : "dark");
 };
 
-document.getElementById("login-pin").addEventListener("input", function(e) {
-    let v = e.target.value.replace(/[^0-9]/g,"");
-    if (v.length > 4) v = v.slice(0,4) + "-" + v.slice(4,8);
-    e.target.value = v;
-});
-document.getElementById("login-pin").addEventListener("keydown", function(e) {
-    if (e.key === "Enter") window.doLogin();
-});
-document.getElementById("login-user").addEventListener("blur", async function() {
-    const u = this.value.trim(); if (!u) return;
-    const snap = await get(ref(db, `accounts/${u}/pinHint`));
-    const el = document.getElementById("login-hint");
-    if (snap.exists() && snap.val()) { el.textContent = "Hinweis: " + snap.val(); el.style.display = "block"; }
-    else el.style.display = "none";
-});
-
-// ─── INIT APP ───
-async function initApp() {
-    myAvatarData = await getAvatar(myUsername);
-
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app").style.display = "flex";
-    document.getElementById("mobile-nav").style.display = "flex";
-
-    // Sidebar user
-    const sav = document.getElementById("sidebar-av");
-    sav.style.background = stringToColor(myUsername);
-    sav.innerHTML = avatarHTML(myUsername, myAvatarData, 40, 16);
-    document.getElementById("sidebar-name").textContent = myUsername;
-    document.getElementById("sidebar-handle").textContent = "@" + myUsername;
-
-    // Compose avatars
-    const cav = document.getElementById("compose-av");
-    cav.style.background = stringToColor(myUsername);
-    cav.innerHTML = avatarHTML(myUsername, myAvatarData, 40, 16);
-    const mcav = document.getElementById("modal-compose-av");
-    mcav.style.background = stringToColor(myUsername);
-    mcav.innerHTML = avatarHTML(myUsername, myAvatarData, 40, 16);
-    const cmav = document.getElementById("comments-my-av");
-    cmav.style.background = stringToColor(myUsername);
-    cmav.innerHTML = avatarHTML(myUsername, myAvatarData, 40, 16);
-
-    loadFeed();
-    loadTrending();
-
-    // comment input enable
-    document.getElementById("comment-input").addEventListener("input", function() {
-        document.getElementById("comment-send-btn").disabled = !this.value.trim();
-    });
-}
-
-// ─── AUTO LOGIN ───
-(async () => {
-    const saved = localStorage.getItem("ov_session");
-    if (saved) {
-        const snap = await get(ref(db, "accounts/" + saved));
-        if (snap.exists()) {
-            myUsername = saved;
-            await signInAnonymously(auth);
-            await initApp();
-        }
-    }
-})();
-
-// ─── FEED ───
-function loadFeed() {
-    const container = document.getElementById("feed-container");
-    container.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
-    if (feedListener) { off(ref(db, "octoverse/posts"), feedListener); feedListener = null; }
-
-    const postsRef = ref(db, "octoverse/posts");
-    const posts = {};
-
-    onValue(postsRef, async (snap) => {
-        if (!snap.exists()) {
-            container.innerHTML = '<div class="empty-state"><h3>Noch keine Posts</h3><p>Sei der Erste und poste etwas!</p></div>';
-            return;
-        }
-        const data = snap.val();
-        const sorted = Object.entries(data).sort((a,b) => b[1].timestamp - a[1].timestamp);
-        container.innerHTML = "";
-        for (const [id, post] of sorted) {
-            const el = await buildPostEl(id, post);
-            container.appendChild(el);
-        }
-    });
-}
-
-async function buildPostEl(id, post) {
-    const av = await getAvatar(post.author);
+// ─── UTILITY FUNCTIONS ───
+function escHtml(str) {
     const div = document.createElement("div");
-    div.className = "post";
-    div.dataset.postId = id;
-
-    const myLike = post.likes && post.likes[myUsername];
-    const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-    const commentCount = post.comments ? Object.keys(post.comments).length : 0;
-
-    div.innerHTML = `
-        <div class="post-avatar" style="background:${stringToColor(post.author)}">
-            ${avatarHTML(post.author, av, 40, 16)}
-        </div>
-        <div class="post-body">
-            <div class="post-header">
-                <span class="post-name">${escHtml(post.author)}</span>
-                <span class="post-handle">@${escHtml(post.author)}</span>
-                <span class="post-dot">·</span>
-                <span class="post-time">${timeAgo(post.timestamp)}</span>
-            </div>
-            ${post.text ? `<div class="post-text">${escHtml(post.text)}</div>` : ""}
-            ${post.image ? `<div class="post-image"><img src="${post.image}" alt="" loading="lazy"></div>` : ""}
-            <div class="post-actions">
-                <button class="post-action comment" onclick="openComments('${id}');event.stopPropagation();">
-                    <span class="post-action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
-                    <span class="post-count">${commentCount || ""}</span>
-                </button>
-                <button class="post-action like ${myLike ? "liked" : ""}" onclick="toggleLike('${id}');event.stopPropagation();" id="like-btn-${id}">
-                    <span class="post-action-icon">${myLike ? "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>" : "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>"}</span>
-                    <span class="post-count" id="like-count-${id}">${likeCount || ""}</span>
-                </button>
-                <button class="share-villochat-btn" onclick="openShareModal('${id}');event.stopPropagation();" title="Via VilloChat teilen">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
-                </button>
-                ${post.author === myUsername ? `<button class="post-action" onclick="deletePost('${id}');event.stopPropagation();" style="color:var(--text-muted);margin-left:auto;max-width:40px;"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button>` : ""}
-            </div>
-        </div>`;
-
-    div.addEventListener("click", () => openComments(id));
-    return div;
+    div.textContent = str;
+    return div.innerHTML;
 }
 
-// ─── COMPOSE ───
-let composeChars = MAX_CHARS;
-window.onComposeInput = function(el) {
-    composeChars = MAX_CHARS - el.value.length;
-    const charEl = document.getElementById("compose-char");
-    charEl.textContent = composeChars;
-    charEl.className = "compose-char" + (composeChars < 0 ? " over" : composeChars < 50 ? " warn" : "");
-    document.getElementById("compose-btn").disabled = (el.value.trim() === "" && !composeImageData) || composeChars < 0;
-    el.style.height = "auto";
-    el.style.height = el.scrollHeight + "px";
+function stringToColor(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = hash % 360;
+    return `hsl(${hue}, 70%, 50%)`;
+}
+
+function timeAgo(timestamp) {
+    const seconds = Math.floor((Date.now() - timestamp) / 1000);
+    if (seconds < 60) return "Jetzt";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}min`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h`;
+    const days = Math.floor(hours / 24);
+    return `${days}d`;
+}
+
+function toast(message) {
+    const t = document.getElementById("toast");
+    t.textContent = message;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+function avatarHTML(username, avatarUrl, size, fontSize) {
+    if (avatarUrl) {
+        return `<img src="${avatarUrl}" alt="${escHtml(username)}">`;
+    }
+    return username.charAt(0).toUpperCase();
+}
+
+async function getAvatar(username) {
+    const snap = await get(ref(db, `villochat/users/${username}/avatar`));
+    return snap.exists() ? snap.val() : null;
+}
+
+// ─── CHARACTER COUNTER ───
+function updateCharCounter(textarea, counterEl, submitBtn) {
+    const remaining = 280 - textarea.value.length;
+    counterEl.textContent = remaining;
+    counterEl.className = "compose-char-counter";
+    if (remaining < 20) counterEl.classList.add("warn");
+    if (remaining < 0) counterEl.classList.add("over");
+    submitBtn.disabled = remaining < 0 || textarea.value.trim() === "";
+}
+
+document.getElementById("compose-text").addEventListener("input", function() {
+    updateCharCounter(this, document.getElementById("char-counter"), document.getElementById("compose-btn"));
+});
+document.getElementById("modal-compose-text").addEventListener("input", function() {
+    updateCharCounter(this, document.getElementById("modal-char-counter"), document.getElementById("modal-compose-btn"));
+});
+document.getElementById("comment-text").addEventListener("input", function() {
+    const remaining = 280 - this.value.length;
+    const counter = document.getElementById("comment-char-counter");
+    counter.textContent = remaining;
+    counter.className = "compose-char-counter";
+    if (remaining < 20) counter.classList.add("warn");
+    if (remaining < 0) counter.classList.add("over");
+});
+
+// ─── IMAGE UPLOAD ───
+document.getElementById("image-upload-btn").onclick = () => document.getElementById("image-upload-input").click();
+document.getElementById("modal-image-upload-btn").onclick = () => document.getElementById("modal-image-upload-input").click();
+
+window.handleImageUpload = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+        toast("Bild zu groß (max. 5MB)");
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentComposeImage = e.target.result;
+        document.getElementById("compose-image-display").src = currentComposeImage;
+        document.getElementById("compose-image-preview").style.display = "block";
+    };
+    reader.readAsDataURL(file);
 };
 
-window.onModalComposeInput = function(el) {
-    const chars = MAX_CHARS - el.value.length;
-    const charEl = document.getElementById("modal-compose-char");
-    charEl.textContent = chars;
-    charEl.className = "compose-char" + (chars < 0 ? " over" : chars < 50 ? " warn" : "");
-    document.getElementById("modal-compose-btn").disabled = (el.value.trim() === "" && !modalComposeImageData) || chars < 0;
-};
-
-window.handleComposeImage = async function(input) {
-    const file = input.files[0]; if (!file) return;
-    composeImageData = await compressImage(file, MAX_BYTES);
-    if (!composeImageData) { toast("Bild konnte nicht geladen werden.", "error"); return; }
-    document.getElementById("compose-preview-img").src = composeImageData;
-    document.getElementById("compose-img-preview").style.display = "block";
-    document.getElementById("compose-btn").disabled = false;
-    input.value = "";
+window.handleModalImageUpload = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+        toast("Bild zu groß (max. 5MB)");
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentModalComposeImage = e.target.result;
+        document.getElementById("modal-compose-image-display").src = currentModalComposeImage;
+        document.getElementById("modal-compose-image-preview").style.display = "block";
+    };
+    reader.readAsDataURL(file);
 };
 
 window.removeComposeImage = function() {
-    composeImageData = null;
-    document.getElementById("compose-img-preview").style.display = "none";
-    document.getElementById("compose-preview-img").src = "";
-    const txt = document.getElementById("compose-text").value;
-    document.getElementById("compose-btn").disabled = txt.trim() === "";
-};
-
-window.handleModalComposeImage = async function(input) {
-    const file = input.files[0]; if (!file) return;
-    modalComposeImageData = await compressImage(file, MAX_BYTES);
-    if (!modalComposeImageData) { toast("Bild konnte nicht geladen werden.", "error"); return; }
-    document.getElementById("modal-compose-preview-img").src = modalComposeImageData;
-    document.getElementById("modal-compose-img-preview").style.display = "block";
-    document.getElementById("modal-compose-btn").disabled = false;
-    input.value = "";
+    currentComposeImage = null;
+    document.getElementById("compose-image-preview").style.display = "none";
+    document.getElementById("image-upload-input").value = "";
 };
 
 window.removeModalComposeImage = function() {
-    modalComposeImageData = null;
-    document.getElementById("modal-compose-img-preview").style.display = "none";
-    const txt = document.getElementById("modal-compose-text").value;
-    document.getElementById("modal-compose-btn").disabled = txt.trim() === "";
+    currentModalComposeImage = null;
+    document.getElementById("modal-compose-image-preview").style.display = "none";
+    document.getElementById("modal-image-upload-input").value = "";
 };
 
-async function doPost(text, image) {
-    const postRef = push(ref(db, "octoverse/posts"));
-    const postData = { author: myUsername, text: text || "", timestamp: Date.now() };
-    if (image) postData.image = image;
-    await set(postRef, postData);
-    toast("Post veröffentlicht!");
+// ─── LOGIN / REGISTER ───
+let isRegistering = false;
+
+window.toggleRegister = function() {
+    isRegistering = !isRegistering;
+    const btn = document.querySelector(".login-btn.outline");
+    btn.textContent = isRegistering ? "Zurück zur Anmeldung" : "Neu registrieren";
+    document.querySelector(".login-btn:not(.outline)").textContent = isRegistering ? "Registrieren" : "Anmelden";
+};
+
+window.doLogin = async function() {
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value.trim();
+    const errorEl = document.getElementById("login-error");
+    
+    errorEl.style.display = "none";
+    
+    if (!username || !password) {
+        errorEl.textContent = "Bitte alle Felder ausfüllen";
+        errorEl.style.display = "block";
+        return;
+    }
+    
+    const userSnap = await get(ref(db, `villochat/users/${username}`));
+    
+    if (isRegistering) {
+        if (userSnap.exists()) {
+            errorEl.textContent = "Benutzername bereits vergeben";
+            errorEl.style.display = "block";
+            return;
+        }
+        await set(ref(db, `villochat/users/${username}`), {
+            password: password,
+            createdAt: Date.now()
+        });
+        toast("Account erfolgreich erstellt!");
+    } else {
+        if (!userSnap.exists() || userSnap.val().password !== password) {
+            errorEl.textContent = "Falscher Benutzername oder Passwort";
+            errorEl.style.display = "block";
+            return;
+        }
+    }
+    
+    localStorage.setItem("octoverse_username", username);
+    myUsername = username;
+    await initApp();
+};
+
+// ─── INITIALIZE APP ───
+async function initApp() {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "flex";
+    
+    // Set user info
+    const av = await getAvatar(myUsername);
+    const avatarEls = [
+        document.getElementById("sidebar-avatar"),
+        document.getElementById("compose-avatar"),
+        document.getElementById("modal-compose-avatar"),
+        document.getElementById("comment-avatar")
+    ];
+    
+    avatarEls.forEach(el => {
+        el.style.background = stringToColor(myUsername);
+        el.innerHTML = avatarHTML(myUsername, av, 40, 16);
+    });
+    
+    document.getElementById("sidebar-username").textContent = myUsername;
+    document.getElementById("sidebar-handle").textContent = "@" + myUsername;
+    
+    // Load content
+    await loadFeed();
+    await loadTrending();
+    
+    // Listen for new posts
+    onValue(ref(db, "octoverse/posts"), () => {
+        if (document.getElementById("page-home").style.display !== "none") {
+            loadFeed();
+        }
+    });
 }
 
+// ─── CHECK AUTO-LOGIN ───
+if (myUsername) {
+    initApp();
+}
+
+// ─── POST FUNCTIONS ───
 window.submitPost = async function() {
     const text = document.getElementById("compose-text").value.trim();
-    if (!text && !composeImageData) return;
-    const btn = document.getElementById("compose-btn");
-    btn.disabled = true; btn.textContent = "…";
-    try {
-        await doPost(text, composeImageData);
-        document.getElementById("compose-text").value = "";
-        document.getElementById("compose-char").textContent = MAX_CHARS;
-        composeImageData = null;
-        document.getElementById("compose-img-preview").style.display = "none";
-    } catch(e) { toast("Fehler: " + e.message, "error"); }
-    btn.textContent = "Posten"; btn.disabled = true;
+    const image = currentComposeImage;
+    
+    if (!text && !image) return;
+    
+    const postRef = push(ref(db, "octoverse/posts"));
+    const postData = {
+        author: myUsername,
+        text: text,
+        timestamp: Date.now(),
+        likes: 0,
+        comments: 0
+    };
+    
+    if (image) {
+        postData.image = image;
+    }
+    
+    await set(postRef, postData);
+    
+    document.getElementById("compose-text").value = "";
+    currentComposeImage = null;
+    document.getElementById("compose-image-preview").style.display = "none";
+    document.getElementById("image-upload-input").value = "";
+    updateCharCounter(document.getElementById("compose-text"), document.getElementById("char-counter"), document.getElementById("compose-btn"));
+    
+    toast("Post veröffentlicht!");
+    await loadFeed();
 };
 
 window.submitModalPost = async function() {
     const text = document.getElementById("modal-compose-text").value.trim();
-    if (!text && !modalComposeImageData) return;
-    const btn = document.getElementById("modal-compose-btn");
-    btn.disabled = true; btn.textContent = "…";
-    try {
-        await doPost(text, modalComposeImageData);
-        document.getElementById("modal-compose-text").value = "";
-        document.getElementById("modal-compose-char").textContent = MAX_CHARS;
-        modalComposeImageData = null;
-        document.getElementById("modal-compose-img-preview").style.display = "none";
-        closeComposeModal();
-    } catch(e) { toast("Fehler: " + e.message, "error"); }
-    btn.textContent = "Posten"; btn.disabled = true;
+    const image = currentModalComposeImage;
+    
+    if (!text && !image) return;
+    
+    const postRef = push(ref(db, "octoverse/posts"));
+    const postData = {
+        author: myUsername,
+        text: text,
+        timestamp: Date.now(),
+        likes: 0,
+        comments: 0
+    };
+    
+    if (image) {
+        postData.image = image;
+    }
+    
+    await set(postRef, postData);
+    
+    closeComposeModal();
+    document.getElementById("modal-compose-text").value = "";
+    currentModalComposeImage = null;
+    document.getElementById("modal-compose-image-preview").style.display = "none";
+    document.getElementById("modal-image-upload-input").value = "";
+    
+    toast("Post veröffentlicht!");
+    await loadFeed();
 };
 
-// ─── LIKES ───
+// ─── LOAD FEED ───
+async function loadFeed() {
+    const container = document.getElementById("feed-container");
+    container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    
+    const snap = await get(ref(db, "octoverse/posts"));
+    if (!snap.exists()) {
+        container.innerHTML = '<div class="empty-state"><h3>Noch keine Posts</h3><p>Sei der Erste, der etwas postet!</p></div>';
+        return;
+    }
+    
+    let posts = Object.entries(snap.val());
+    
+    if (currentTab === "following") {
+        // TODO: Implement following filter
+        posts = posts.filter(([,p]) => p.author === myUsername);
+    }
+    
+    posts.sort((a, b) => b[1].timestamp - a[1].timestamp);
+    
+    container.innerHTML = "";
+    for (const [id, post] of posts) {
+        const el = await buildPostEl(id, post);
+        container.appendChild(el);
+    }
+}
+
+async function buildPostEl(postId, post) {
+    const div = document.createElement("div");
+    div.className = "post";
+    
+    const av = await getAvatar(post.author);
+    const likeRef = ref(db, `octoverse/posts/${postId}/likedBy/${myUsername}`);
+    const likeSnap = await get(likeRef);
+    const isLiked = likeSnap.exists();
+    
+    div.innerHTML = `
+        <div class="post-avatar" style="background:${stringToColor(post.author)}">
+            ${avatarHTML(post.author, av, 40, 16)}
+        </div>
+        <div class="post-content">
+            <div class="post-header">
+                <span class="post-author">${escHtml(post.author)}</span>
+                <span class="post-handle">@${escHtml(post.author)}</span>
+                <span class="post-timestamp">· ${timeAgo(post.timestamp)}</span>
+            </div>
+            ${post.text ? `<div class="post-text">${escHtml(post.text)}</div>` : ""}
+            ${post.image ? `<img src="${post.image}" class="post-image" alt="Post image">` : ""}
+            <div class="post-actions">
+                <button class="post-action comment" onclick="openComments('${postId}')">
+                    <span class="post-action-icon">💬</span>
+                    <span class="post-action-count">${post.comments || 0}</span>
+                </button>
+                <button class="post-action like ${isLiked ? 'liked' : ''}" onclick="toggleLike('${postId}')">
+                    <span class="post-action-icon">${isLiked ? '❤️' : '🤍'}</span>
+                    <span class="post-action-count">${post.likes || 0}</span>
+                </button>
+                <button class="post-action share" onclick="openShareModal('${postId}')">
+                    <span class="post-action-icon">📤</span>
+                    <span class="post-action-count"></span>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    return div;
+}
+
+// ─── LIKE FUNCTIONS ───
 window.toggleLike = async function(postId) {
-    const likeRef = ref(db, `octoverse/posts/${postId}/likes/${myUsername}`);
+    const likeRef = ref(db, `octoverse/posts/${postId}/likedBy/${myUsername}`);
+    const postRef = ref(db, `octoverse/posts/${postId}`);
+    
     const snap = await get(likeRef);
+    const postSnap = await get(postRef);
+    
+    if (!postSnap.exists()) return;
+    
+    const currentLikes = postSnap.val().likes || 0;
+    
     if (snap.exists()) {
         await remove(likeRef);
-        const btn = document.getElementById("like-btn-" + postId);
-        if (btn) { btn.className = "post-action like"; btn.querySelector(".post-action-icon").textContent = "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>"; }
+        await update(postRef, { likes: Math.max(0, currentLikes - 1) });
     } else {
         await set(likeRef, true);
-        const btn = document.getElementById("like-btn-" + postId);
-        if (btn) { btn.className = "post-action like liked"; btn.querySelector(".post-action-icon").textContent = "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>"; }
+        await update(postRef, { likes: currentLikes + 1 });
     }
-    // Update count
-    const countSnap = await get(ref(db, `octoverse/posts/${postId}/likes`));
-    const count = countSnap.exists() ? Object.keys(countSnap.val()).length : 0;
-    const countEl = document.getElementById("like-count-" + postId);
-    if (countEl) countEl.textContent = count || "";
-};
-
-// ─── DELETE POST ───
-window.deletePost = async function(postId) {
-    if (!confirm("Post löschen?")) return;
-    await remove(ref(db, `octoverse/posts/${postId}`));
-    toast("Post gelöscht.");
+    
+    await loadFeed();
 };
 
 // ─── COMMENTS ───
 window.openComments = async function(postId) {
-    currentPostId = postId;
-    const snap = await get(ref(db, `octoverse/posts/${postId}`));
-    if (!snap.exists()) return;
-    const post = snap.val();
-
-    // Render post in modal
+    currentCommentPost = postId;
+    
+    const postSnap = await get(ref(db, `octoverse/posts/${postId}`));
+    if (!postSnap.exists()) return;
+    
+    const post = postSnap.val();
     const av = await getAvatar(post.author);
-    const myLike = post.likes && post.likes[myUsername];
-    const likeCount = post.likes ? Object.keys(post.likes).length : 0;
-    const commentCount = post.comments ? Object.keys(post.comments).length : 0;
-
-    document.getElementById("comments-post-content").innerHTML = `
-        <div class="post" style="cursor:default;">
+    
+    const originalPost = document.getElementById("comments-original-post");
+    originalPost.innerHTML = `
+        <div class="post" style="border-bottom: none; cursor: default;">
             <div class="post-avatar" style="background:${stringToColor(post.author)}">
                 ${avatarHTML(post.author, av, 40, 16)}
             </div>
-            <div class="post-body">
+            <div class="post-content">
                 <div class="post-header">
-                    <span class="post-name">${escHtml(post.author)}</span>
+                    <span class="post-author">${escHtml(post.author)}</span>
                     <span class="post-handle">@${escHtml(post.author)}</span>
-                    <span class="post-dot">·</span>
-                    <span class="post-time">${timeAgo(post.timestamp)}</span>
+                    <span class="post-timestamp">· ${timeAgo(post.timestamp)}</span>
                 </div>
                 ${post.text ? `<div class="post-text">${escHtml(post.text)}</div>` : ""}
-                ${post.image ? `<div class="post-image"><img src="${post.image}" alt="" loading="lazy"></div>` : ""}
-                <div class="post-actions">
-                    <button class="post-action comment">
-                        <span class="post-action-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span>
-                        <span class="post-count">${commentCount || ""}</span>
-                    </button>
-                    <button class="post-action like ${myLike ? "liked" : ""}" onclick="toggleLike('${postId}')">
-                        <span class="post-action-icon">${myLike ? "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>" : "<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>"}</span>
-                        <span class="post-count">${likeCount || ""}</span>
-                    </button>
-                    <button class="share-villochat-btn" onclick="openShareModal('${postId}')">
-                        <span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></span> VilloChat
-                    </button>
-                </div>
+                ${post.image ? `<img src="${post.image}" class="post-image" alt="Post image">` : ""}
             </div>
-        </div>`;
-
+        </div>
+    `;
+    
     // Load comments
-    await loadComments(postId);
-
-    document.getElementById("comment-input").value = "";
-    document.getElementById("comment-send-btn").disabled = true;
+    const commentsSnap = await get(ref(db, `octoverse/posts/${postId}/commentsList`));
+    const commentsList = document.getElementById("comments-list");
+    
+    if (!commentsSnap.exists()) {
+        commentsList.innerHTML = '<div class="empty-state"><p>Keine Kommentare</p></div>';
+    } else {
+        const comments = Object.entries(commentsSnap.val()).sort((a,b) => a[1].timestamp - b[1].timestamp);
+        commentsList.innerHTML = "";
+        
+        for (const [, comment] of comments) {
+            const commentAv = await getAvatar(comment.author);
+            const commentDiv = document.createElement("div");
+            commentDiv.className = "comment-item";
+            commentDiv.innerHTML = `
+                <div class="post-avatar" style="background:${stringToColor(comment.author)}">
+                    ${avatarHTML(comment.author, commentAv, 40, 16)}
+                </div>
+                <div style="flex: 1;">
+                    <div class="post-header">
+                        <span class="post-author">${escHtml(comment.author)}</span>
+                        <span class="post-handle">@${escHtml(comment.author)}</span>
+                        <span class="post-timestamp">· ${timeAgo(comment.timestamp)}</span>
+                    </div>
+                    <div class="post-text">${escHtml(comment.text)}</div>
+                </div>
+            `;
+            commentsList.appendChild(commentDiv);
+        }
+    }
+    
     document.getElementById("comments-modal").style.display = "flex";
 };
 
-async function loadComments(postId) {
-    const snap = await get(ref(db, `octoverse/posts/${postId}/comments`));
-    const list = document.getElementById("comments-list");
-    if (!snap.exists()) { list.innerHTML = '<div class="empty-state" style="padding:24px;">Noch keine Antworten.</div>'; return; }
-    const comments = snap.val();
-    const sorted = Object.entries(comments).sort((a,b) => a[1].timestamp - b[1].timestamp);
-    list.innerHTML = "";
-    for (const [cid, c] of sorted) {
-        const av = await getAvatar(c.author);
-        const div = document.createElement("div");
-        div.className = "comment";
-        div.innerHTML = `
-            <div class="comment-avatar" style="background:${stringToColor(c.author)}">
-                ${avatarHTML(c.author, av, 32, 13)}
-            </div>
-            <div class="comment-body">
-                <div class="comment-header">
-                    <strong>${escHtml(c.author)}</strong>
-                    <span> · ${timeAgo(c.timestamp)}</span>
-                </div>
-                <div class="comment-text">${escHtml(c.text)}</div>
-            </div>`;
-        list.appendChild(div);
-    }
-}
-
 window.submitComment = async function() {
-    if (!currentPostId) return;
-    const text = document.getElementById("comment-input").value.trim();
-    if (!text) return;
-    const btn = document.getElementById("comment-send-btn");
-    btn.disabled = true; btn.textContent = "…";
-    try {
-        const commentRef = push(ref(db, `octoverse/posts/${currentPostId}/comments`));
-        await set(commentRef, { author: myUsername, text, timestamp: Date.now() });
-        document.getElementById("comment-input").value = "";
-        await loadComments(currentPostId);
-        toast("Antwort gepostet!");
-    } catch(e) { toast("Fehler: " + e.message, "error"); }
-    btn.textContent = "Antworten";
+    const text = document.getElementById("comment-text").value.trim();
+    if (!text || !currentCommentPost) return;
+    
+    const commentRef = push(ref(db, `octoverse/posts/${currentCommentPost}/commentsList`));
+    await set(commentRef, {
+        author: myUsername,
+        text: text,
+        timestamp: Date.now()
+    });
+    
+    const postRef = ref(db, `octoverse/posts/${currentCommentPost}`);
+    const postSnap = await get(postRef);
+    if (postSnap.exists()) {
+        const currentComments = postSnap.val().comments || 0;
+        await update(postRef, { comments: currentComments + 1 });
+    }
+    
+    document.getElementById("comment-text").value = "";
+    await openComments(currentCommentPost);
+    toast("Kommentar gepostet!");
 };
 
 window.closeCommentsModal = function() {
     document.getElementById("comments-modal").style.display = "none";
-    currentPostId = null;
+    currentCommentPost = null;
+    loadFeed();
 };
 
 // ─── SHARE TO VILLOCHAT ───
 window.openShareModal = async function(postId) {
     currentSharePost = postId;
-    const snap = await get(ref(db, `accounts/${myUsername}/contacts`));
+    
+    const contactsSnap = await get(ref(db, `villochat/users/${myUsername}/contacts`));
     const list = document.getElementById("share-contacts-list");
-    if (!snap.exists()) {
-        list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Keine VilloChat-Kontakte gefunden.</p>';
+    
+    if (!contactsSnap.exists()) {
+        list.innerHTML = '<div class="empty-state"><p>Keine Kontakte gefunden</p></div>';
     } else {
-        const contacts = Object.keys(snap.val());
         list.innerHTML = "";
-        for (const c of contacts) {
-            const av = await getAvatar(c);
+        const contacts = Object.keys(contactsSnap.val());
+        
+        for (const contact of contacts) {
+            const av = await getAvatar(contact);
             const btn = document.createElement("button");
             btn.style.cssText = "display:flex;align-items:center;gap:12px;width:100%;background:none;border:none;color:var(--text);font-family:var(--font);font-size:15px;padding:10px 0;cursor:pointer;border-bottom:1px solid var(--border);";
-            btn.innerHTML = `<div style="width:36px;height:36px;border-radius:50%;background:${stringToColor(c)};overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:white;">${avatarHTML(c, av, 36, 14)}</div><span>${escHtml(c)}</span>`;
-            btn.onclick = () => sendShareToContact(c);
+            btn.innerHTML = `
+                <div style="width:36px;height:36px;border-radius:50%;background:${stringToColor(contact)};overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:white;">
+                    ${avatarHTML(contact, av, 36, 14)}
+                </div>
+                <span>${escHtml(contact)}</span>
+            `;
+            btn.onclick = () => sendShareToContact(contact);
             list.appendChild(btn);
         }
     }
+    
     document.getElementById("share-modal").style.display = "flex";
 };
 
 async function sendShareToContact(contactName) {
     if (!currentSharePost) return;
+    
     const postSnap = await get(ref(db, `octoverse/posts/${currentSharePost}`));
     if (!postSnap.exists()) return;
+    
     const post = postSnap.val();
-
-    const chatId = myUsername < contactName
-        ? `${myUsername}_${contactName}`
-        : `${contactName}_${myUsername}`;
-
+    const chatId = myUsername < contactName ? `${myUsername}_${contactName}` : `${contactName}_${myUsername}`;
+    
     const msgText = `🐙 *Octoverse-Post von @${post.author}*:\n${post.text || ""}`;
     const msgRef = push(ref(db, `messages/${chatId}`));
-    const msgData = { sender: myUsername, text: msgText, timestamp: Date.now(), read: false };
-    if (post.image) { msgData.isImage = true; msgData.text = post.image; }
+    const msgData = {
+        sender: myUsername,
+        text: msgText,
+        timestamp: Date.now(),
+        read: false
+    };
+    
+    if (post.image) {
+        msgData.isImage = true;
+        msgData.text = post.image;
+    }
+    
     await set(msgRef, msgData);
-
-    // Also send a text preview if there was also an image
+    
     if (post.image && post.text) {
         const txtRef = push(ref(db, `messages/${chatId}`));
-        await set(txtRef, { sender: myUsername, text: `🐙 @${post.author}: ${post.text}`, timestamp: Date.now() + 1, read: false });
+        await set(txtRef, {
+            sender: myUsername,
+            text: `🐙 @${post.author}: ${post.text}`,
+            timestamp: Date.now() + 1,
+            read: false
+        });
     }
-
+    
     closeShareModal();
     toast(`An @${contactName} gesendet!`);
 }
@@ -1188,29 +1262,40 @@ window.closeShareModal = function() {
 };
 
 // ─── NAVIGATION ───
-function setActivePage(id) {
-    ["page-home","page-explore","page-profile"].forEach(p => {
-        document.getElementById(p).style.display = p === id ? "block" : "none";
-    });
-}
-function setActiveNav(id) {
-    ["nav-home","nav-explore","nav-profile"].forEach(n => {
-        const el = document.getElementById(n);
-        if (el) el.classList.toggle("active", n === id);
-    });
-}
-
 window.showFeed = function() {
-    setActivePage("page-home"); setActiveNav("nav-home");
+    document.getElementById("page-home").style.display = "block";
+    document.getElementById("page-explore").style.display = "none";
+    document.getElementById("page-profile").style.display = "none";
+    
+    document.getElementById("nav-home").classList.add("active");
+    document.getElementById("nav-explore").classList.remove("active");
+    document.getElementById("nav-profile").classList.remove("active");
 };
-window.showExplore = function() {
-    setActivePage("page-explore"); setActiveNav("nav-explore");
-    loadAllPostsForExplore();
+
+window.showExplore = async function() {
+    document.getElementById("page-home").style.display = "none";
+    document.getElementById("page-explore").style.display = "block";
+    document.getElementById("page-profile").style.display = "none";
+    
+    document.getElementById("nav-home").classList.remove("active");
+    document.getElementById("nav-explore").classList.add("active");
+    document.getElementById("nav-profile").classList.remove("active");
+    
+    await loadAllPostsForExplore();
 };
+
 window.showProfile = async function() {
-    setActivePage("page-profile"); setActiveNav("nav-profile");
+    document.getElementById("page-home").style.display = "none";
+    document.getElementById("page-explore").style.display = "none";
+    document.getElementById("page-profile").style.display = "block";
+    
+    document.getElementById("nav-home").classList.remove("active");
+    document.getElementById("nav-explore").classList.remove("active");
+    document.getElementById("nav-profile").classList.add("active");
+    
     await loadProfilePage(myUsername);
 };
+
 window.openVilloChat = function() {
     window.open("villochat-v.html", "_blank");
 };
@@ -1234,22 +1319,35 @@ window.openComposeModal = function() {
     document.getElementById("compose-modal").style.display = "flex";
     setTimeout(() => document.getElementById("modal-compose-text").focus(), 100);
 };
+
 window.closeComposeModal = function() {
     document.getElementById("compose-modal").style.display = "none";
+    document.getElementById("modal-compose-text").value = "";
+    currentModalComposeImage = null;
+    document.getElementById("modal-compose-image-preview").style.display = "none";
+    document.getElementById("modal-image-upload-input").value = "";
 };
 
-// ─── EXPLORE / SEARCH ───
+// ─── EXPLORE ───
 let allPostsCache = [];
+
 async function loadAllPostsForExplore() {
     const snap = await get(ref(db, "octoverse/posts"));
-    if (!snap.exists()) { document.getElementById("explore-posts").innerHTML = '<div class="empty-state"><h3>Keine Posts</h3></div>'; return; }
+    const container = document.getElementById("explore-posts");
+    
+    if (!snap.exists()) {
+        container.innerHTML = '<div class="empty-state"><h3>Keine Posts</h3></div>';
+        return;
+    }
+    
     allPostsCache = Object.entries(snap.val()).sort((a,b) => b[1].timestamp - a[1].timestamp);
-    renderExplorePosts(allPostsCache);
+    await renderExplorePosts(allPostsCache);
 }
 
 async function renderExplorePosts(posts) {
     const container = document.getElementById("explore-posts");
     container.innerHTML = "";
+    
     for (const [id, post] of posts) {
         const el = await buildPostEl(id, post);
         container.appendChild(el);
@@ -1257,11 +1355,16 @@ async function renderExplorePosts(posts) {
 }
 
 window.doExploreSearch = function(query) {
-    if (!query) { renderExplorePosts(allPostsCache); return; }
+    if (!query) {
+        renderExplorePosts(allPostsCache);
+        return;
+    }
+    
     const q = query.toLowerCase();
     const filtered = allPostsCache.filter(([,p]) =>
         p.text?.toLowerCase().includes(q) || p.author?.toLowerCase().includes(q)
     );
+    
     renderExplorePosts(filtered);
 };
 
@@ -1270,21 +1373,27 @@ async function loadProfilePage(username) {
     document.getElementById("profile-page-title").textContent = username;
     document.getElementById("profile-name-display").textContent = username;
     document.getElementById("profile-handle-display").textContent = "@" + username;
-
+    
     const av = await getAvatar(username);
     const avEl = document.getElementById("profile-av");
     avEl.style.background = stringToColor(username);
     avEl.innerHTML = avatarHTML(username, av, 80, 28);
-
-    // Load user posts
+    
     const snap = await get(ref(db, "octoverse/posts"));
     const container = document.getElementById("profile-posts-container");
-    if (!snap.exists()) { container.innerHTML = '<div class="empty-state"><p>Noch keine Posts.</p></div>'; return; }
+    
+    if (!snap.exists()) {
+        container.innerHTML = '<div class="empty-state"><p>Noch keine Posts.</p></div>';
+        return;
+    }
+    
     const posts = Object.entries(snap.val())
         .filter(([,p]) => p.author === username)
         .sort((a,b) => b[1].timestamp - a[1].timestamp);
+    
     document.getElementById("profile-post-count").textContent = posts.length;
     container.innerHTML = "";
+    
     for (const [id, post] of posts) {
         const el = await buildPostEl(id, post);
         container.appendChild(el);
@@ -1294,7 +1403,13 @@ async function loadProfilePage(username) {
 // ─── TRENDING ───
 async function loadTrending() {
     const snap = await get(ref(db, "octoverse/posts"));
-    if (!snap.exists()) return;
+    const list = document.getElementById("trending-list");
+    
+    if (!snap.exists()) {
+        list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Keine Trends</p>';
+        return;
+    }
+    
     const words = {};
     Object.values(snap.val()).forEach(p => {
         if (!p.text) return;
@@ -1304,15 +1419,21 @@ async function loadTrending() {
             }
         });
     });
+    
     const sorted = Object.entries(words).sort((a,b) => b[1]-a[1]).slice(0,5);
-    const list = document.getElementById("trending-list");
-    if (!sorted.length) { list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Keine Trends</p>'; return; }
+    
+    if (!sorted.length) {
+        list.innerHTML = '<p style="color:var(--text-muted);font-size:14px;">Keine Trends</p>';
+        return;
+    }
+    
     list.innerHTML = sorted.map(([tag, count], i) => `
         <div class="trend-item">
             <div class="trend-category">Trend #${i+1}</div>
             <div class="trend-name">${escHtml(tag)}</div>
             <div class="trend-count">${count} Posts</div>
-        </div>`).join("");
+        </div>
+    `).join("");
 }
 </script>
 </body>
